@@ -101,7 +101,7 @@
                 </div>
             </div>
         </div>
-        <button id="addFile" class="icon-button"><span class="material-icons">add_circle</span><br>Upload</button>
+        <button id="addFile" class="icon-button"><span class="material-icons">add_circle</span><br>Add File</button>
     </header>
     <!-- <h2>DICOM Viewer</h2> -->
     <div id="block">
@@ -131,10 +131,10 @@
     <div id="uploadModal" class="modal hidden">
         <div class="modal-content">
             <span class="close" onclick="closeModal()">&times;</span>
-            <h2>Upload File</h2>
+            <h2>Add File</h2>
             <form action="/upload" method="POST" enctype="multipart/form-data">
                 <input type="file" id="file" name="file" accept=".dcm, .jpg, .png">
-                <input type="submit" value="Upload">
+                <input type="submit" value="Add File">
             </form>
         </div>
     </div>
