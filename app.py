@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 import os
 import pydicom
-from PIL import Image
+# from PIL import Image
 import numpy as np
 from flask_cors import CORS
 

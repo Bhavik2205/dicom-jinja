@@ -2,6 +2,5 @@ Gunicorn
 Flask
 Jinja2
 pydicom
-PIL
 numpy
 flask_cors
