@@ -1,0 +1,251 @@
+#block {
+    display: flex;
+    flex-direction: row; /* Row-wise arrangement */
+    height: calc(100vh - 440px); /*Adjust according to header height */
+    /* display: flex;
+    justify-content: space-between;
+    margin: 5px;
+    height: calc(100vh - 440px); Adjust according to header height */
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #1b1b1b;
+    color: #f5f5f5;
+}
+
+/* Header styles */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 20px;
+    /* Slightly larger padding for a balanced look */
+    background-color: #27272b;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.logo {
+    width: 200px;
+    margin-top: 5px;
+    margin-left: 30px;
+    margin-right: -50px;
+    /* Adjust logo size for balance */
+}
+
+/* Center the button container */
+.button-container-wrapper {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+.button-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    justify-content: center;
+}
+
+button {
+    /* padding: 0;
+    border: 1px solid black; */
+    border-radius: 5px;
+    /* cursor: pointer; */
+}
+
+/* #dicomViewerContainer {
+    display: flex;
+    flex-wrap: wrap;
+    width: 50%;
+    height: 400px;
+    border: 1px solid white;
+    background-color: white;
+} */
+
+#dicomViewerContainer {
+    flex: 0 0 80%;
+    border: 1px solid #ddd;
+    height: 200%; /*Full height to match the screen */
+    background-color: black;
+    color: white;
+    display: flex;
+    flex-wrap: wrap;
+    /* flex-direction: column; */
+    justify-content: center;
+    align-items: flex-start; /* Align items to the left inside the viewer */
+    position: relative;
+}
+
+
+#sidebar {
+    width: 28%;
+    border: 1px solid black;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #000000;
+}
+
+/* Patient Info Styling in the Viewer
+#patientDetails1,
+#patientDetails2,
+#patientDetails3,
+#patientDetails4 {
+    position: absolute;
+    background: rgb(255 255 255 / 4%);
+    color: white;
+    padding: 5px;
+    border-radius: 5px;
+    font-size: 17px;
+    z-index: 10;
+}
+
+#patientDetails1 {
+    top: 10px;
+    left: 10px;
+}
+
+#patientDetails2 {
+    top: 10px;
+    right: 10px;
+}
+
+#patientDetails3 {
+    bottom: 10px;
+    right: 10px;
+}
+
+#patientDetails4 {
+    bottom: 10px;
+    left: 10px;
+} */
+
+
+
+.hidden {
+    display: none;
+}
+
+#moreMenu {
+    position: fixed;
+    background-color: #27272b;
+    border: 1px solid #ccc;
+    padding: 10px;
+    top: 11.7%;  /*Ensure it is just below the "More" button */
+    right: 17%;
+    z-index: 1000;
+}
+
+.more-menu button {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.more-button {
+    position: relative;
+}
+
+/* .show {
+    display: flex;
+} */
+
+
+.icon-button {
+    /* display: flex; */
+    width: 70px; /* Fixed width to make the button square */
+    height: 70px; /* Fixed height to make the button square */
+    font-size: 12px; /* Adjust text size as needed */
+    padding: 4px;
+    border: none;
+    background-color: transparent;
+    color: white;
+    cursor: pointer;
+    text-align: center;
+    margin-right: -10px;
+}
+
+.icon-button .material-icons {
+    font-size: 33px; /* Adjust icon size as needed */
+}
+
+.icon-button .icon-img {
+    width: 30px; /* Adjust icon size as needed */
+    height: auto; /* Maintain aspect ratio */
+    margin-bottom: 2px;
+}
+
+.icon-button .text {
+    margin-top: 5px; /* Adjust space between icon and text as needed */
+}
+
+.icon-button:hover {
+    color: #d31e47; /* Optional: background color on hover */
+}
+
+.icon-button.active {
+    border: 2px solid #d31e47;/* Optional: highlight active button */    
+    color: #fff; /* Optional: background color on hover */
+    background-color: #d31e47; /* Optional: background color for active state */
+}
+
+
+#addFile {
+    margin-right: 10px;
+}
+
+
+/* Modal css */
+.modal {
+    /* display: flex; */
+    justify-content: center;
+    align-items: center;
+    position: fixed;
+    z-index: 1000;
+    top: 0;
+    bottom: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+.modal-content {
+    background-color: #fff;
+    color: #000000;
+    padding: 20px;
+    border-radius: 5px;
+    width: 400px;
+    position: relative;
+}
+
+.close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+/* Dropdown content */
+#dropdownContent {
+    position: fixed;
+    background-color: #27272b;
+    border: 1px solid #ccc;
+    padding: 10px;
+    top: 11.7%;  /*Ensure it is just below the "More" button */
+    right: 68.8%;
+    z-index: 1000;
+}
+
+#dropdownContent a {
+    display: block;
+    margin-bottom: 5px;
+    color: #fff;
+    font-size: 20px;
+    text-decoration: none;
+    padding: 10px;
+}
+
+#dropdownContent a:hover {
+    background-color: #d31e47;
+}

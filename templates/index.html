@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DICOM Viewer</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+
+    <!------ Cornerstone tools ------->
+    <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cornerstone-math@0.1.6/dist/cornerstoneMath.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/cornerstone-core@2.2.4/dist/cornerstone.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/cornerstone-web-image-loader@2.1.0/dist/cornerstoneWebImageLoader.js"></script>
+
+    <!-- development version, includes helpful console warnings -->
+    <script src="https://cdn.jsdelivr.net/npm/cornerstone-tools@3.0.0-b.641/dist/cornerstoneTools.js"></script>
+    <!-- Load Cornerstone libraries -->
+    <script src="https://unpkg.com/dicom-parser@latest/dist/dicomParser.min.js"></script>
+    <script src="https://unpkg.com/cornerstone-core/dist/cornerstone.min.js"></script>
+    <script src="https://unpkg.com/cornerstone-tools/dist/cornerstoneTools.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/cornerstone-wado-image-loader@3.0.6/dist/cornerstoneWADOImageLoader.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/cornerstone-web-image-loader@2.1.1/dist/cornerstoneWebImageLoader.min.js"></script>
+    <script
+        src="https://cdn.jsdelivr.net/npm/cornerstone-file-image-loader@0.3.0/dist/cornerstoneFileImageLoader.min.js"></script>
+</head>
+
+<body>
+    <header>
+        <img src="{{ url_for('static', filename='logoFull.png') }}" alt="Company Logo" class="logo">
+        <div class="button-container-wrapper">
+            <div class="button-container">
+                <!-- <button id="activateWwwc">Window / Level</button> -->
+                <button id="activateWwwc" class="icon-button"><span
+                        class="material-icons">contrast</span><br>Window / Level</button>
+                <button id="layout" onclick="toggleLayoutButton()" class="icon-button"><span
+                        class="material-icons">grid_view</span><br>Layout</button>
+                <div id="dropdownContent" class="hidden">
+                    <a href="#" onclick="createCanvases('1x1')">1 x 1</a>
+                    <a href="#" onclick="createCanvases('1x2')">1 x 2</a>
+                    <a href="#" onclick="createCanvases('1x3')">1 x 3</a>
+                    <a href="#" onclick="createCanvases('2x1')">2 x 1</a>
+                    <a href="#" onclick="createCanvases('2x2')">2 x 2</a>
+                    <a href="#" onclick="createCanvases('2x3')">2 x 3</a>
+                    <a href="#" onclick="createCanvases('3x1')">3 x 1</a>
+                    <a href="#" onclick="createCanvases('3x2')">3 x 2</a>
+                    <a href="#" onclick="createCanvases('3x3')">3 x 3</a>
+                </div>
+                <button id="activateInvert" class="icon-button"><span
+                        class="material-icons">invert_colors</span><br>Invert</button>
+                <button id="activateRectangle" class="icon-button"><span
+                        class="material-icons">crop_square</span><br>Rectangle</button>
+                <button id="activateCircle" class="icon-button"><span
+                        class="material-icons">radio_button_unchecked</span><br>Circle</button>
+                <button id="activateElliptical" class="icon-button"><img
+                        src="{{ url_for('static', filename='icons/ellipse.png') }}" alt="Elliptical Roi"
+                        class="icon-img"><br>Elliptical</button>
+                <button id="activateArrowAnnotate" class="icon-button"><span
+                        class="material-icons">call_received</span><br>Arrow</button>
+                <button id="activatePan" class="icon-button"><span
+                        class="material-icons">open_with</span><br>Pan</button>
+                <button id="activateZoom" class="icon-button"><span
+                        class="material-icons">zoom_in</span><br>Zoom</button>
+                <button id="activateMagnify" class="icon-button"><span
+                        class="material-icons">search</span><br>Magnify</button>
+                <button id="hFlip" type="button" class="icon-button"><img
+                        src="{{ url_for('static', filename='icons/hflip.png') }}" alt="HFlip"
+                        class="icon-img"><br>HFlip</button>
+                <button id="vFlip" type="button" class="icon-button"><img
+                        src="{{ url_for('static', filename='icons/vflip.png') }}" alt="VFlip"
+                        class="icon-img"><br>VFlip</button>
+                <button id="rRotate" type="button" class="icon-button"><span
+                        class="material-icons">rotate_right</span><br>R. Right</button>
+                <button id="lRotate" type="button" class="icon-button"><span
+                        class="material-icons">rotate_left</span><br>R. Left</button>
+                <button id="moreButton" onclick="toggleMoreButtons()" class="icon-button"><span
+                        class="material-icons">more_horiz</span><br>More</button>
+
+                <!-- Hidden buttons, revealed when "More" is clicked -->
+                <div id="moreMenu" class="hidden">
+                    <button id="activateRotate" class="icon-button"><span
+                            class="material-icons">refresh</span><br>Rotate</button>
+                    <button id="activateLength" class="icon-button"><img
+                            src="{{ url_for('static', filename='icons/ruler.png') }}" alt="Length"
+                            class="icon-img"><br>Length</button>
+                    <button id="activateAngle" class="icon-button"><img
+                            src="{{ url_for('static', filename='icons/angle.png') }}" alt="Angle"
+                            class="icon-img"><br>Angle</button>
+                    <button id="activateCobbAngle" class="icon-button"><img
+                            src="{{ url_for('static', filename='icons/cobangle.png') }}" alt="Cobb Angle"
+                            class="icon-img"><br>Cobb</button>
+                    <button id="activateErase" class="icon-button"><img
+                            src="{{ url_for('static', filename='icons/eraser.png') }}" alt="Eraser Icon"
+                            class="icon-img"><br>Erase</button>
+                    <button id="resetTools" class="icon-button"><span
+                            class="material-icons">restart_alt</span><br>Reset</button>
+                </div>
+            </div>
+        </div>
+        <button id="addFile" class="icon-button"><span class="material-icons">add_circle</span><br>Upload</button>
+    </header>
+    <!-- <h2>DICOM Viewer</h2> -->
+    <div id="block">
+        <!-- <div id="dicomDetails">
+            <h3>DICOM File Details</h3>
+            <ul id="detailsList">
+                
+            </ul>
+        </div> -->
+        <div id="sidebar">
+            <h3>File Previews</h3>
+            <div id="previewList">
+                <!-- Previews will be dynamically generated here -->
+                {% for file in files %}
+                <li>
+                    <a draggable="true" href="{{ url_for('uploaded_file', filename=file) }}" data-url="{{ url_for('uploaded_file', filename=file) }}"
+                        onclick="loadAndViewImage(this, '{{ file }}'); return false;">{{ file }}</a>
+                </li>
+                {% endfor %}
+            </div>
+        </div>
+        <div id="dicomViewerContainer">
+        <!-- Canvases will be dynamically generated here -->
+        </div>
+    </div>
+    <!-- Modal for File Upload -->
+    <div id="uploadModal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <h2>Upload File</h2>
+            <form action="/upload" method="POST" enctype="multipart/form-data">
+                <input type="file" id="file" name="file" accept=".dcm, .jpg, .png">
+                <input type="submit" value="Upload">
+            </form>
+        </div>
+    </div>
+    <!-- <h1>Upload and View DICOM Files</h1>
+
+    <h2>Uploaded Files:</h2>
+    <ul id="fileList">
+        {% for file in files %}
+        <li>
+            <a draggable="true" href="{{ url_for('uploaded_file', filename=file) }}" data-url="{{ url_for('uploaded_file', filename=file) }}"
+                onclick="loadAndViewImage(this, '{{ file }}'); return false;">{{ file }}</a>
+        </li>
+        {% endfor %}
+    </ul>     -->
+    <script src="{{ url_for('static', filename='main.js') }}"></script>
+</body>
+
+</html>
