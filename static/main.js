@@ -131,124 +131,19 @@ document.addEventListener('DOMContentLoaded', function () {
         cornerstoneTools.setToolActive('CobbAngle', { mouseButtonMask: 1 })
     });
 
+    document.getElementById('activateCrosshair').addEventListener('click', function (e) {
+        console.log("Crosshair tool activated");
+        cornerstoneTools.addTool(cornerstoneTools.CrosshairsTool);
+        cornerstoneTools.setToolActive('Crosshairs', { mouseButtonMask: 1 })
+        console.log('Active Tools:', cornerstoneTools.getActiveTools);
+    });
+
+
     document.getElementById('activateErase').addEventListener('click', function (e) {
         console.log("Erase tool activated");
         cornerstoneTools.addTool(cornerstoneTools.EraserTool)
         cornerstoneTools.setToolActive('Eraser', { mouseButtonMask: 1 })
     });
-
-
-
-
-   
-
-    // File input element
-    // const fileInput = document.getElementById('file');
-    // console.log('fileInput', fileInput);
-    // if (fileInput) {
-    //     // Event listener for file selection
-    //     fileInput.addEventListener('change', function (event) {
-    //         console.log("File input changed");
-    //         const file = event.target.files[0];
-    //         if (file) {
-    //             const reader = new FileReader();
-    //             reader.onload = function (e) {
-    //                 console.log("File read as ArrayBuffer");
-    //                 const arrayBuffer = e.target.result;
-    //                 const byteArray = new Uint8Array(arrayBuffer);
-
-    //                 // Parse DICOM file
-    //                 dicomParser.parseDicom(byteArray).then(function (dataSet) {
-    //                     console.log("DICOM file parsed");
-    //                     const imageId = cornerstoneWADOImageLoader.wadouri.fileManager.add(dataSet);
-    //                     cornerstone.loadImage(imageId).then(function (image) {
-    //                         console.log("Image loaded");
-    //                         cornerstone.displayImage(element, image);
-    //                     }).catch(function (err) {
-    //                         console.error('Error loading image:', err);
-    //                     });
-    //                 }).catch(function (err) {
-    //                     console.error('Error parsing DICOM file:', err);
-    //                 });
-    //             };
-    //             reader.readAsArrayBuffer(file);
-    //         }
-    //     });
-    // }
-
-    // Add event listener for image rendered event
-    // element.addEventListener('cornerstoneimagerendered', function (e) {
-    //     const viewport = cornerstone.getViewport(e.target);
-    //     const zoom = viewport.scale.toFixed(2);
-    //     const wwc = `W: ${viewport.voi.windowWidth.toFixed(2)}, L: ${viewport.voi.windowCenter.toFixed(2)}`;
-
-    //     document.getElementById('zoom').textContent = `Zoom: ${zoom}`;
-    //     document.getElementById('wwc').textContent = `Wwc: ${wwc}`;
-    // });
-
-
-    // function loadAndViewImage(linkElement, fileName) {
-    //     const imageUrl = linkElement.getAttribute('data-url');
-    //     console.log("Loading image:", imageUrl);
-    //     const extension = fileName.split('.').pop().toLowerCase();
-
-    //     let imageId;
-
-    //     cornerstone.reset(element);
-
-    //     // Use different imageId formats based on the file type
-    //     if (extension === 'dcm') {
-    //         imageId = 'wadouri:' + imageUrl;  // Use wadouri for DICOM
-    //     } else if (['jpg', 'jpeg', 'png'].includes(extension)) {
-    //         imageId = "http://localhost:5000" + imageUrl; // Use webimage for PNG, JPG
-    //     } else {
-    //         console.error('Unsupported file format:', extension);
-    //         return;
-    //     }
-
-    //     console.log("ImageId:", imageId);
-    //     cornerstone.loadImage(imageId).then(function (image) {
-    //         console.log("Image loaded successfully:", image);
-    //         // const firstCanvas = document.querySelector('#dicomViewerContainer .dicomViewer');
-    //         // if (firstCanvas) {
-    //         //     cornerstone.displayImage(firstCanvas, image);
-    //         // } else {
-    //         cornerstone.displayImage(element, image);
-    //         // }
-
-
-    //         if (extension === 'dcm') {
-    //             const defaultViewport = cornerstone.getDefaultViewportForImage(element, image);
-    //             cornerstone.setViewport(element, defaultViewport);
-    //             // Extract and display DICOM metadata only for DICOM files
-    //             const dataSet = image.data;
-    //             displayDICOMDetails(dataSet);
-    //         } else if (['jpg', 'jpeg', 'png'].includes(extension)) {
-    //             // Reset viewport for web images (e.g., JPG/PNG)
-    //             const defaultWebViewport = {
-    //                 invert: false,  // Ensure the image isn't inverted
-    //                 voi: {
-    //                     windowWidth: 255,  // Standard window width for web images
-    //                     windowCenter: 128  // Standard window center for web images
-    //                 }
-    //             };
-    //             cornerstone.setViewport(element, defaultWebViewport);
-
-    //             // Clear DICOM details for non-DICOM files
-    //             document.getElementById('detailsList').innerHTML = '';
-
-    //             document.getElementById('patientId').textContent = 'Patient ID: N/A';
-    //             document.getElementById('patientName').textContent = 'Patient Name: N/A';
-    //             document.getElementById('patientGender').textContent = 'Patient BirthDate: N/A';
-    //             document.getElementById('patientBirth').textContent = 'Patient Gender: N/A';
-    //             document.getElementById('studyDescription').textContent = 'Study Description: N/A';
-    //             document.getElementById('studyDate').textContent = 'Study Date: N/A';
-    //         }
-    //     }).catch(function (err) {
-    //         console.error('Error loading image:', err);
-    //     });
-    // }
-
 });
 
 
@@ -274,6 +169,7 @@ function toggleLayoutButton() {
 }
 
 document.querySelectorAll('.icon-button').forEach(button => {
+    // cornerstoneTools.stopClip();
     button.addEventListener('click', () => {
         if (button.id !== 'moreButton' && button.id !== 'addFile' && button.id !== 'resetTools' && button.id !== 'layout' && button.id !== 'lRotate' && button.id !== 'rRotate' && button.id !== 'hFlip' && button.id !== 'vFlip' && button.id !== 'activateInvert') {
             button.classList.add('active'); // Add active class first
@@ -375,13 +271,10 @@ function handleDrop(event) {
     cornerstone.enable(targetCanvas);  // Ensure the canvas is enabled
 
     // Get the dropped file URL
-    console.log('event:', event);
     const url = event.dataTransfer.getData('text/uri-list');
-    console.log('Dropped URL:', url);
     const fileName = url.split('/').pop();
     const extension = fileName.split('.').pop().toLowerCase();
-    console.log('Dropped file:', fileName);
-    console.log('Extension:', extension);
+
     let imageId;
 
     // Use different imageId formats based on the file type
@@ -400,14 +293,56 @@ function handleDrop(event) {
 
     // Load and display the image in the target canvas
     cornerstone.loadImage(imageId).then(function (image) {
-        cornerstone.displayImage(targetCanvas, image);
+        const imageData = image.data; // Retrieve the image data
 
+        // Check if imageData is valid and contains the necessary metadata
+        
+        //   console.log('Image data:', imageData.string('x00280008'));
+        
         if (extension === 'dcm') {
+            const dataSet = image.data;
+            const numFrames = dataSet.string('x00280008')
+            const FrameRate = 1000/dataSet.floatString('x00181063');
+            if (imageData) {
+                console.log('Image data:', imageData.string('x00280008'));
+                const imageIds = [];
+                for(var i=0; i < numFrames; i++) {
+                    const imageIdR = imageId + "?frame="+i;
+                    imageIds.push(imageIdR);
+                }
+                const stack = {
+                    currentImageIdIndex : 0,
+                    imageIds: imageIds
+                };
+                
+                cornerstone.loadAndCacheImage(imageIds[0]).then(function(image) {
+                    console.log(image);
+                    // now that we have an image frame in the cornerstone cache, we can decrement
+                    // the reference count added by load() above when we loaded the metadata.  This way
+                    // cornerstone will free all memory once all imageId's are removed from the cache
+                    cornerstoneWADOImageLoader.wadouri.dataSetCacheManager.unload(imageId);
+    
+                    cornerstone.displayImage(targetCanvas, image);
+                    // if(loaded === false) {
+                        // cornerstoneTools.wwwc.activate(targetCanvas, 1); // ww/wc is the default tool for left mouse button
+                        // Set the stack as tool state
+                        cornerstoneTools.addStackStateManager(targetCanvas, ['stack', 'playClip']);
+                        cornerstoneTools.addToolState(targetCanvas, 'stack', stack);
+                        // Start playing the clip
+                        // cornerstoneTools.playClip(targetCanvas, FrameRate);
+                        loaded = true;
+                    // }
+                }, function(err) {
+                    alert(err);
+                });
+              } else {
+                cornerstone.displayImage(targetCanvas, image);
+            }
+
             const defaultViewport = cornerstone.getDefaultViewportForImage(targetCanvas, image);
             cornerstone.setViewport(targetCanvas, defaultViewport);
 
             // Extract and display DICOM metadata
-            const dataSet = image.data;
             const uniqueId = targetCanvas.id;
             // Example: update patient details in the canvas div
             document.getElementById(`patientId-${uniqueId}`).textContent = `${dataSet.string('x00100020') || 'N/A'}`;
@@ -420,6 +355,7 @@ function handleDrop(event) {
             document.getElementById(`length-${uniqueId}`).textContent = `Length: ${dataSet.uint16('x00280011') || 'N/A'}`;
             // Add more metadata as needed
         } else {
+            cornerstone.displayImage(targetCanvas, image);
             // Reset viewport and clear details for non-DICOM files
             const defaultWebViewport = {
                 invert: false,
@@ -433,12 +369,14 @@ function handleDrop(event) {
     }).catch(function (err) {
         console.error('Error loading image:', err);
     });
-    
+
+        cornerstoneTools.stopClip(targetCanvas);
+
     targetCanvas.addEventListener('cornerstoneimagerendered', function (e) {
         const viewport = cornerstone.getViewport(e.target);
         const zoom = viewport.scale.toFixed(2);
         const wwc = `W: ${viewport.voi.windowWidth.toFixed(2)}, L: ${viewport.voi.windowCenter.toFixed(2)}`;
-    
+
         const uniqueId = e.target.id;
         document.getElementById(`zoom-${uniqueId}`).textContent = `Zoom: ${zoom}`;
         document.getElementById(`wwc-${uniqueId}`).textContent = `Wwc: ${wwc}`;
@@ -480,7 +418,25 @@ function handleDrop(event) {
         viewport.vflip = !viewport.vflip;
         cornerstone.setViewport(selectedCanvas, viewport);
     });
-    
+
+    document.getElementById('activateStackScroll').addEventListener('click', function (e) {
+        cornerstoneTools.addTool(cornerstoneTools.StackScrollMouseWheelTool);
+        const selectedCanvas = document.querySelector('.selected');
+        cornerstoneTools.setToolActive('StackScrollMouseWheel', { mouseButtonMask: 1, frameRate: 1 });
+        if(selectedCanvas){
+            cornerstoneTools.getToolState('StackScrollMouseWheel').isMouseWheelActive = true;
+            cornerstoneTools.setToolActiveForElement(selectedCanvas, 'StackScrollMouseWheel');
+        }
+        // cornerstoneTools.setToolActive('StackScrollMouseWheel', { mouseButtonMask: 1, frameRate: 1 });
+        console.log('Active Tools:', cornerstoneTools.getActiveTools);
+    });
+
+    document.getElementById('activateCine').addEventListener('click', function (e) {
+        const selectedCanvas = document.querySelector('.selected');
+        cornerstoneTools.playClip(targetCanvas, 15);
+        console.log('Active Tools:', cornerstoneTools.getActiveTools);
+    });
+
     document.getElementById('activateInvert').addEventListener('click', function (e) {
         const selectedCanvas = document.querySelector('.selected');
         const viewport = cornerstone.getViewport(selectedCanvas);
@@ -489,101 +445,49 @@ function handleDrop(event) {
     });
 }
 
-function loadAndViewImage(linkElement, fileName) {
-    const imageUrl = linkElement.getAttribute('data-url');
-    console.log("Loading image:", imageUrl);
-    const extension = fileName.split('.').pop().toLowerCase();
+// function loadAndViewImage(linkElement, fileName) {
+//     const imageUrl = linkElement.getAttribute('data-url');
+//     console.log("Loading image:", imageUrl);
+//     const extension = fileName.split('.').pop().toLowerCase();
 
-    let imageId;
+//     let imageId;
 
-    cornerstone.reset(linkElement);
+//     cornerstone.reset(linkElement);
 
-    // Use different imageId formats based on the file type
-    if (extension === 'dcm') {
-        imageId = 'wadouri:' + imageUrl;  // Use wadouri for DICOM
-    } else if (['jpg', 'jpeg', 'png'].includes(extension)) {
-        imageId = "http://localhost:5000" + imageUrl; // Use webimage for PNG, JPG
-    } else {
-        console.error('Unsupported file format:', extension);
-        return;
-    }
+//     // Use different imageId formats based on the file type
+//     if (extension === 'dcm') {
+//         imageId = 'wadouri:' + imageUrl;  // Use wadouri for DICOM
+//     } else if (['jpg', 'jpeg', 'png'].includes(extension)) {
+//         imageId = "http://localhost:5000" + imageUrl; // Use webimage for PNG, JPG
+//     } else {
+//         console.error('Unsupported file format:', extension);
+//         return;
+//     }
 
-    console.log("ImageId:", imageId);
-    cornerstone.loadImage(imageId).then(function (image) {
-        console.log("Image loaded successfully:", image);
-        
-        cornerstone.displayImage(linkElement, image);
+//     console.log("ImageId:", imageId);
+//     cornerstone.loadImage(imageId).then(function (image) {
+//         console.log("Image loaded successfully:", image);
 
-
-        if (extension === 'dcm') {
-            const defaultViewport = cornerstone.getDefaultViewportForImage(linkElement, image);
-            cornerstone.setViewport(linkElement, defaultViewport);
-            // Extract and display DICOM metadata only for DICOM files
-            const dataSet = image.data;
-        } else if (['jpg', 'jpeg', 'png'].includes(extension)) {
-            // Reset viewport for web images (e.g., JPG/PNG)
-            const defaultWebViewport = {
-                invert: false,  // Ensure the image isn't inverted
-                voi: {
-                    windowWidth: 255,  // Standard window width for web images
-                    windowCenter: 128  // Standard window center for web images
-                }
-            };
-            cornerstone.setViewport(linkElement, defaultWebViewport);
-        }
-    }).catch(function (err) {
-        console.error('Error loading image:', err);
-    });
-}
+//         cornerstone.displayImage(linkElement, image);
 
 
-window.addEventListener('load', function () {
-    const fileLinks = document.querySelectorAll('#previewList .file-preview');
-    fileLinks.forEach(function (linkElement) {
-        const fileName = linkElement.getAttribute('data-filename');
-        console.log("File Name:", fileName);
-        cornerstone.enable(linkElement);
-        console.log('fileName:', fileName);
-        loadAndViewImage(linkElement, fileName);
-
-        const container = linkElement.closest('div[draggable="true"]');
-        console.log("Container:", container);
-        // Handle the drag on the parent container
-        container.addEventListener('dragstart', function (event) {
-            console.log('data-url: ', linkElement.getAttribute('data-url'));
-            event.dataTransfer.setData('text/uri-list', linkElement.getAttribute('data-url'));
-            event.dataTransfer.setData('text/plain', fileName);
-            console.log('Dragging:', fileName);
-        });
-    });
-});
-
-// window.addEventListener('load', function () {
-//     const filePreviews = document.querySelectorAll('#previewList a ');
-
-//     console.log("File Previews:", filePreviews);
-    
-//     // Enable each preview element for Cornerstone and make it draggable
-//     filePreviews.forEach(function (previewElement) {
-//         console.log('previewElement: ', previewElement);
-//         const element = previewElement.getElementsByClassName('.preview');
-//         console.log('element: ', element);
-//         const fileName = previewElement.getAttribute('data-filename');
-//         const imageUrl = previewElement.getAttribute('data-url');
-        
-//         // Enable dragging for the preview element
-//         previewElement.addEventListener('dragstart', function (event) {
-//             // Set data to transfer (can include the file URL or filename)
-//             event.dataTransfer.setData('text/plain', fileName);
-//             console.log("Dragging file:", fileName);
-//         });
-
-//         // Enable Cornerstone for the preview element
-//         cornerstone.enable(previewElement);
-
-//         // Automatically load and view the image on page load
-//         loadAndViewImage(previewElement, fileName);
+//         if (extension === 'dcm') {
+//             const defaultViewport = cornerstone.getDefaultViewportForImage(linkElement, image);
+//             cornerstone.setViewport(linkElement, defaultViewport);
+//             // Extract and display DICOM metadata only for DICOM files
+//             const dataSet = image.data;
+//         } else if (['jpg', 'jpeg', 'png'].includes(extension)) {
+//             // Reset viewport for web images (e.g., JPG/PNG)
+//             const defaultWebViewport = {
+//                 invert: false,  // Ensure the image isn't inverted
+//                 voi: {
+//                     windowWidth: 255,  // Standard window width for web images
+//                     windowCenter: 128  // Standard window center for web images
+//                 }
+//             };
+//             cornerstone.setViewport(linkElement, defaultWebViewport);
+//         }
+//     }).catch(function (err) {
+//         console.error('Error loading image:', err);
 //     });
-// });
-
-// Ensure that your existing loadAndViewImage function is used here to load files correctly
+// }

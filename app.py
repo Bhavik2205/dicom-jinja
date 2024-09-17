@@ -10,7 +10,7 @@ app = Flask(__name__, static_folder='static')
 CORS(app, resources={r"/*": {"origins": "*"}})
 app.config['UPLOAD_FOLDER'] = 'uploads'
 
-ALLOWED_EXTENSIONS = {'dcm', 'jpg', 'png'}
+ALLOWED_EXTENSIONS = {'dcm', 'jpg', 'png', 'pdf'}
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
@@ -35,6 +35,7 @@ def uploaded_file(filename):
     try:
         return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
     except Exception as e:
+        print("error", e)
         app.logger.error(f"Error serving file: {e}")
         return "File not found", 404
 

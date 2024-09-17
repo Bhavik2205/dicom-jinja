@@ -249,3 +249,29 @@ button {
 #dropdownContent a:hover {
     background-color: #d31e47;
 }
+
+.crosshair-cursor {
+    cursor: crosshair;
+}
+
+.crosshair-tool {
+    position: absolute;
+    pointer-events: none;
+}
+
+.crosshair-tool .crosshair-line {
+    position: absolute;
+    background-color: rgba(255, 255, 255, 0.5);
+}
+
+.crosshair-tool .crosshair-line.horizontal {
+    height: 1px;
+    left: 0;
+    right: 0;
+}
+
+.crosshair-tool .crosshair-line.vertical {
+    width: 1px;
+    top: 0;
+    bottom: 0;
+}
