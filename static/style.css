@@ -81,6 +81,7 @@ button {
 
 #sidebar {
     width: 28%;
+    height: 190%;
     border: 1px solid black;
     padding: 10px;
     overflow-y: auto;
@@ -249,7 +250,7 @@ button {
 #dropdownContent a:hover {
     background-color: #d31e47;
 }
-
+/* 
 .crosshair-cursor {
     cursor: crosshair;
 }
@@ -274,4 +275,4 @@ button {
     width: 1px;
     top: 0;
     bottom: 0;
-}
+} */

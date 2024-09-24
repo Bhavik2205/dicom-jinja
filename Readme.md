@@ -878,3 +878,81 @@
     //         console.error('Error loading image:', err);
     //     });
     // }
+
+
+window.onload = function () {
+    const draggableDivs = document.querySelectorAll('#previewList .draggable');
+
+    draggableDivs.forEach(function (draggableDiv) {
+        // Set up drag event
+        draggableDiv.addEventListener('dragstart', function (e) {
+            const url = 'http://127.0.0.1:5000' + draggableDiv.dataset.url;
+            e.dataTransfer.setData('text/uri-list', url);
+            e.dataTransfer.setData('text/plain', draggableDiv.innerText);
+            console.log('Dragging:', url);
+            loadAndViewImage(draggableDiv, url);
+        });
+    });
+
+    // // Select all the <a> tags inside the previewList
+    // const links = document.querySelectorAll('#previewList a');
+    // const block = document.getElementById('previewList');
+    // console.log({ block });
+    // // Loop through each <a> tag and log the href attribute
+    // links.forEach(function (link) {
+    //     console.log(link.href); // Logs the full URL of each link
+    //     const draggableDiv = document.createElement('div');
+    //     draggableDiv.className = 'draggable';
+    //     draggableDiv.draggable = true;
+    //     draggableDiv.innerText = link.innerText; // Set the file name as the div's content
+    //     draggableDiv.dataset.url = link.dataset.url; // Add data-url attribute to the div
+    //     draggableDiv.dataset.filename = link.innerText; // Add the filename to the div
+
+    //     // Set up drag event
+    //     draggableDiv.addEventListener('dragstart', function (e) {
+    //         const url = 'http://127.0.0.1:5000' + draggableDiv.dataset.url;
+    //         e.dataTransfer.setData('text/uri-list', url);
+    //         e.dataTransfer.setData('text/plain', draggableDiv.innerText);
+    //         console.log('Dragging:', url); 
+
+    //         // e.dataTransfer.setData('text/uri-list', draggableDiv.dataset.url);
+    //         // e.dataTransfer.setData('text/plain', draggableDiv.dataset.filename);
+    //     });
+
+    //     // const url = event.dataTransfer.getData('text/uri-list');
+    //     // Append the draggable div to the block
+    //     block.appendChild(draggableDiv);
+    // });
+
+    const targetCanvas = document.querySelector('.dicomViewer'); // Adjust selector as needed
+
+    targetCanvas.addEventListener('dragover', handleDragOver);
+    targetCanvas.addEventListener('drop', handleDrop);
+};
+
+
+
+
+
+
+
+
+
+
+
+  {% for file in files %}
+                                <!-- <li>
+                                        <a draggable="true" href="{{ url_for('uploaded_file', filename=file) }}"
+                                                data-url="{{ url_for('uploaded_file', filename=file) }}"
+                                                onclick="loadAndViewImage(this, '{{ file }}'); return false;">{{ file
+                                                }}</a>
+                                </li> -->
+                                <div class="previewSquare" draggable="true"
+                                        data-url="{{ url_for('uploaded_file', filename=file) }}"
+                                        style="flex: 1 0 45%; margin: -1px; border: 1px solid #ccc; padding: 10px; text-align: center;">
+                                        <div class="draggable" draggable="true"
+                                                data-url="{{ url_for('uploaded_file', filename=file) }}">
+                                                {{ file }}
+                                        </div>
+                                </div>
+                                {% endfor %}
