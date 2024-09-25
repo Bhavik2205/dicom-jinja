@@ -956,3 +956,187 @@ window.onload = function () {
                                         </div>
                                 </div>
                                 {% endfor %}
+
+
+
+
+
+
+24/09/2024
+<div id="preview-{{ loop.index }}" style="width: 40px; height: 100px;">
+                                                        {% set file_ext = file.split('.')[-1].lower() %}
+                                                        {% if file_ext == 'jpg' or file_ext == 'jpeg' or file_ext ==
+                                                        'png' %}
+                                                        <!-- Show image preview for JPG -->
+                                                        <img src="{{ url_for('uploaded_file', date=date, filename=file) }}"
+                                                                alt="{{ file }}" style="width: 660%; height: 100px;" />
+
+                                                        {% elif file_ext == 'dcm' %}
+                                                        <!-- DICOM preview area -->
+                                                        <canvas id="dicomCanvas-{{ loop.index }}"
+                                                        style="width: 660%; height: 100%;"></canvas>
+
+                                                        <script>
+                                                                var dicomUrl = 'http://localhost:5000' + "{{ url_for('uploaded_file', date=date, filename=file) }}";
+                                                                console.log({ dicomUrl });
+                                                                fetch(dicomUrl)
+                                                                        .then(response => response.arrayBuffer())
+                                                                        .then(buffer => {
+                                                                                try {
+                                                                                        const dicomParser = window.dicomParser;
+                                                                                        const dataSet = dicomParser.parseDicom(new Uint8Array(buffer));
+                                                                                        const pixelDataElement = dataSet.elements.x7fe00010;
+                                                                                        if (!pixelDataElement) {
+                                                                                                console.error('No pixel data found in DICOM file');
+                                                                                                return;
+                                                                                        }
+
+                                                                                        const pixelData = new Uint8Array(dataSet.byteArray.buffer, pixelDataElement.dataOffset, pixelDataElement.length);
+                                                                                        const rows = dataSet.uint16('x00280010');
+                                                                                        const cols = dataSet.uint16('x00280011');
+
+                                                                                        const canvas = document.getElementById("dicomCanvas-{{ loop.index }}");
+                                                                                        const ctx = canvas.getContext('2d');
+                                                                                        canvas.width = cols;
+                                                                                        canvas.height = rows;
+
+                                                                                        const imageData = ctx.createImageData(cols, rows);
+                                                                                        for (let i = 0; i < pixelData.length; i++) {
+                                                                                                const value = pixelData[i];
+                                                                                                imageData.data[i * 4] = value;      // Red
+                                                                                                imageData.data[i * 4 + 1] = value;  // Green
+                                                                                                imageData.data[i * 4 + 2] = value;  // Blue
+                                                                                                imageData.data[i * 4 + 3] = 255;    // Alpha (fully opaque)
+                                                                                        }
+                                                                                        ctx.putImageData(imageData, 0, 0);
+
+                                                                                        const pngDataUrl = canvas.toDataURL('image/png');
+                                                                                        console.log(pngDataUrl);
+                                                                                } catch (err) {
+                                                                                        console.error('Error parsing DICOM file', err);
+                                                                                }
+                                                                        });
+                                                        </script>
+
+                                                        {% else %}
+                                                        <!-- Show message for unsupported file type -->
+                                                        <p>File preview not available</p>
+
+                                                        {% endif %}
+                                                </div>
+
+
+ <!-- {% for date, files in files_by_date.items() %}
+                                <h4>{{ date }}</h4>
+                                {% for file in files %}
+                                <div class="previewSquare" draggable="true"
+                                        data-url="{{ url_for('uploaded_file', date=date, filename=file) }}"
+                                        style="flex: 1 0 45%; margin: 5px; border: 1px solid #ccc; padding: 10px; text-align: center;">
+                                        <div class="draggable" draggable="true"
+                                                data-url="{{ url_for('uploaded_file', date=date, filename=file) }}">
+                                                <div id="preview-{{ loop.index }}" style="width: 80px; height: 100px; align-items: center;">
+                                                </div>
+                                        </div>
+                                </div>
+                                {% endfor %}
+                                {% endfor %} -->
+
+
+
+                                <!-- <div style="display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start;">
+                                    {% for file in files %}
+                                    <div class="previewSquare" draggable="true"
+                                         data-url="{{ url_for('uploaded_file', date=date, filename=file) }}"
+                                         style="flex: 0 1 calc(33.33% - 0px); border: 1px solid #ccc; padding: 0px; text-align: center; box-sizing: border-box;">
+                                        <div class="draggable" draggable="true"
+                                             data-url="{{ url_for('uploaded_file', date=date, filename=file) }}">
+                                            <div id="preview-{{ loop.index }}"
+                                                 style="width: 50px; height: 50px; align-items: center;">
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {% endfor %}
+                                </div> -->
+
+
+
+
+
+
+
+Button
+<div class="button-container">
+                                <!-- <button id="activateWwwc">Window / Level</button> -->
+                                <button id="activateWwwc" class="icon-button"><span
+                                                class="material-icons">contrast</span><br>Window / Level</button>
+                                <button id="layout" onclick="toggleLayoutButton()" class="icon-button"><span
+                                                class="material-icons">grid_view</span><br>Layout</button>
+                                <div id="dropdownContent" class="hidden">
+                                        <a href="#" onclick="createCanvases('1x1')">1 x 1</a>
+                                        <a href="#" onclick="createCanvases('1x2')">1 x 2</a>
+                                        <a href="#" onclick="createCanvases('1x3')">1 x 3</a>
+                                        <a href="#" onclick="createCanvases('2x1')">2 x 1</a>
+                                        <a href="#" onclick="createCanvases('2x2')">2 x 2</a>
+                                        <a href="#" onclick="createCanvases('2x3')">2 x 3</a>
+                                        <a href="#" onclick="createCanvases('3x1')">3 x 1</a>
+                                        <a href="#" onclick="createCanvases('3x2')">3 x 2</a>
+                                        <a href="#" onclick="createCanvases('3x3')">3 x 3</a>
+                                </div>
+                                <button id="activateInvert" class="icon-button"><span
+                                                class="material-icons">invert_colors</span><br>Invert</button>
+                                <button id="activateRectangle" class="icon-button"><span
+                                                class="material-icons">crop_square</span><br>Rectangle</button>
+                                <button id="activateCircle" class="icon-button"><span
+                                                class="material-icons">radio_button_unchecked</span><br>Circle</button>
+                                <button id="activateElliptical" class="icon-button"><img
+                                                src="{{ url_for('static', filename='icons/ellipse.png') }}"
+                                                alt="Elliptical Roi" class="icon-img"><br>Elliptical</button>
+                                <button id="activateArrowAnnotate" class="icon-button"><span
+                                                class="material-icons">call_received</span><br>Arrow</button>
+                                <button id="activatePan" class="icon-button"><span
+                                                class="material-icons">open_with</span><br>Pan</button>
+                                <button id="activateZoom" class="icon-button"><span
+                                                class="material-icons">zoom_in</span><br>Zoom</button>
+                                <button id="activateMagnify" class="icon-button"><span
+                                                class="material-icons">search</span><br>Magnify</button>
+                                <button id="hFlip" type="button" class="icon-button"><img
+                                                src="{{ url_for('static', filename='icons/hflip.png') }}" alt="HFlip"
+                                                class="icon-img"><br>HFlip</button>
+                                <button id="vFlip" type="button" class="icon-button"><img
+                                                src="{{ url_for('static', filename='icons/vflip.png') }}" alt="VFlip"
+                                                class="icon-img"><br>VFlip</button>
+                                <button id="rRotate" type="button" class="icon-button"><span
+                                                class="material-icons">rotate_right</span><br>R. Right</button>
+                                <button id="lRotate" type="button" class="icon-button"><span
+                                                class="material-icons">rotate_left</span><br>R. Left</button>
+                                <button id="moreButton" onclick="toggleMoreButtons()" class="icon-button"><span
+                                                class="material-icons">more_horiz</span><br>More</button>
+
+                                <!-- Hidden buttons, revealed when "More" is clicked -->
+                                <div id="moreMenu" class="hidden">
+                                        <button id="activateRotate" class="icon-button"><span
+                                                        class="material-icons">refresh</span><br>Rotate</button>
+                                        <button id="activateLength" class="icon-button"><img
+                                                        src="{{ url_for('static', filename='icons/ruler.png') }}"
+                                                        alt="Length" class="icon-img"><br>Length</button>
+                                        <button id="activateAngle" class="icon-button"><img
+                                                        src="{{ url_for('static', filename='icons/angle.png') }}"
+                                                        alt="Angle" class="icon-img"><br>Angle</button>
+                                        <button id="activateCobbAngle" class="icon-button"><img
+                                                        src="{{ url_for('static', filename='icons/cobangle.png') }}"
+                                                        alt="Cobb Angle" class="icon-img"><br>Cobb</button>
+                                        <button id="activateCrosshair" class="icon-button"><img
+                                                        src="{{ url_for('static', filename='icons/crosshairs.png') }}"
+                                                        alt="Crosshair" class="icon-img"><br>Crosshair</button>
+                                        <button id="activateStackScroll" class="icon-button"><img
+                                                        src="{{ url_for('static', filename='icons/layer.png') }}"
+                                                        alt="StackScroll" class="icon-img"><br>StackScroll</button>
+                                        <button id="activateCine" class="icon-button"><span
+                                                        class="material-icons">play_arrow</span><br>Cine</button>
+                                        <button id="activateErase" class="icon-button"><img
+                                                        src="{{ url_for('static', filename='icons/eraser.png') }}"
+                                                        alt="Eraser Icon" class="icon-img"><br>Erase</button>
+                                        <button id="resetTools" class="icon-button"><span
+                                                        class="material-icons">restart_alt</span><br>Reset</button>
+                                </div>
+                        </div>

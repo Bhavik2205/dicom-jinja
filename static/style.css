@@ -276,3 +276,25 @@ button {
     top: 0;
     bottom: 0;
 } */
+
+
+.draggable canvas {
+    width: 100px;
+    height: 100PX;
+    OBJECT-FIT: COVER;
+}
+
+.date-dropdown {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.arrow {
+    font-size: 35px;
+    transition: transform 0.3s;
+}
+
+.open .arrow {
+    transform: rotate(180deg);
+}

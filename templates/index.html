@@ -27,7 +27,24 @@
                 src="https://cdn.jsdelivr.net/npm/cornerstone-web-image-loader@2.1.1/dist/cornerstoneWebImageLoader.min.js"></script>
         <script
                 src="https://cdn.jsdelivr.net/npm/cornerstone-file-image-loader@0.3.0/dist/cornerstoneFileImageLoader.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/tiff@6.1.1/lib/index.min.js"></script>
+        <!-- <script src="https://cdn.jsdelivr.net/npm/tiff@6.1.1/lib/index.min.js"></script> -->
+        <!-- <script>
+                const config = {
+                        useWebWorkers: true,
+                        webWorkerPath: "https://cdn.jsdelivr.net/npm/cornerstone-wado-image-loader@3.0.6/dist/cornerstoneWADOImageLoaderWebWorker.min.js", // Correct path
+                        taskConfiguration: {
+                                'decodeTask': {
+                                        codecsPath: 'https://cdn.jsdelivr.net/npm/cornerstone-wado-image-loader@3.0.6/dist/cornerstoneWADOImageLoaderCodecs.min.js'
+                                }
+                        }
+                };
+                cornerstoneWebImageLoader.external.cornerstone = cornerstone;
+                cornerstoneFileImageLoader.external.cornerstone = cornerstone
+                cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
+                cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
+                cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
+                cornerstoneWADOImageLoader.webWorkerManager.initialize(config);
+        </script> -->
 </head>
 
 <body>
@@ -119,55 +136,27 @@
                         <h3>File Previews</h3>
                         <div id="previewList">
                                 {% for date, files in files_by_date.items() %}
-                                <h4>{{ date }}</h4>
-                                {% for file in files %}
-                                <div class="previewSquare" draggable="true"
-                                        data-url="{{ url_for('uploaded_file', date=date, filename=file) }}"
-                                        style="flex: 1 0 45%; margin: 5px; border: 1px solid #ccc; padding: 10px; text-align: center;">
-                                        <div class="draggable" draggable="true"
-                                                data-url="{{ url_for('uploaded_file', date=date, filename=file) }}">
-                                                {{ file }}
-                                                <div id="preview-{{ loop.index }}" style="width: 40px; height: 100px;">
+                                <!-- <h4>{{ date }}</h4> -->
+                                <div class="date-dropdown" style="border: 1px solid #ccc; margin: 15px 0 0px; padding: 5px; cursor: pointer;">
+                                        <span style="margin-right: 10px;">{{ date }}</span>
+                                        <span class="arrow">&#9662;</span> <!-- Down arrow -->
+                                    </div>
+                                <div style="display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start;">
+                                        {% for file in files %}
+                                        <div class="previewSquare" draggable="true"
+                                                data-url="{{ url_for('uploaded_file', date=date, filename=file) }}"
+                                                style="flex: 0 1 calc(33.33% - 0px); max-width: calc(33.33% - 0px); height: calc(33.33% - 0px); border: 1px solid #ccc; padding: 0px; text-align: center; box-sizing: border-box;">
+                                                <div class="draggable" draggable="true"
+                                                        data-url="{{ url_for('uploaded_file', date=date, filename=file) }}">
+                                                        <div id="preview-{{ loop.index }}"
+                                                                style="width: 90%; height: 90%; position: relative;">
+                                                        </div>
                                                 </div>
                                         </div>
+                                        {% endfor %}
                                 </div>
-                                <script>
-                                        const imageUrl = 'http://localhost:5000' + "{{ url_for('uploaded_file', date=date, filename=file) }}";
-                                        var element = document.getElementById("preview-{{ loop.index }}");
 
-                                        // const extension = imageUrl.split('.').pop().toLowerCase();
-                                        // let imageId;
-
-                                        // // Use different imageId formats based on the file type
-                                        // if (extension === 'dcm') {
-                                        //         imageId = 'wadouri:' + imageUrl;  // Use wadouri for DICOM
-                                        // } else if (['jpg', 'jpeg', 'png'].includes(extension)) {
-                                        //         imageId = imageUrl; // Use webimage for PNG, JPG
-                                        // } else {
-                                        //         console.error('Unsupported file format:', extension);
-                                        //         return;
-                                        // }
-                                        // console.log();
-                                        // cornerstone.loadAndCacheImage(imageUrl).then(function (image) {
-                                        //         cornerstone.enable(element);
-                                        //         cornerstone.displayImage(element, image);
-                                        // });
-                                </script>
                                 {% endfor %}
-                                {% endfor %}
-                                <!-- {% for date, files in files_by_date.items() %}
-                                <h4>{{ date }}</h4>
-                                {% for file in files %}
-                                <div class="previewSquare" draggable="true"
-                                        data-url="{{ url_for('uploaded_file', date=date, filename=file) }}"
-                                        style="flex: 1 0 45%; margin: 5px; border: 1px solid #ccc; padding: 10px; text-align: center;">
-                                        <div class="draggable" draggable="true"
-                                                data-url="{{ url_for('uploaded_file', date=date, filename=file) }}">
-                                                {{ file }}
-                                        </div>
-                                </div>
-                                {% endfor %}
-                                {% endfor %} -->
                         </div>
                 </div>
                 <div id="dicomViewerContainer">
@@ -185,17 +174,6 @@
                         </form>
                 </div>
         </div>
-        <!-- <h1>Upload and View DICOM Files</h1>
-
-    <h2>Uploaded Files:</h2>
-    <ul id="fileList">
-        {% for file in files %}
-        <li>
-            <a draggable="true" href="{{ url_for('uploaded_file', filename=file) }}" data-url="{{ url_for('uploaded_file', filename=file) }}"
-                onclick="loadAndViewImage(this, '{{ file }}'); return false;">{{ file }}</a>
-        </li>
-        {% endfor %}
-    </ul>     -->
         <script src="{{ url_for('static', filename='main.js') }}"></script>
 </body>
 
