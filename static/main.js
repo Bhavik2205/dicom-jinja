@@ -1,3 +1,6 @@
+// Global variable to store current images in canvases
+let storedImages = {};  // Format: { "canvas-0-0": "imageId1", "canvas-0-1": "imageId2", ... }
+
 window.addEventListener('load', function () {
     // Fetch all the preview elements
     const previewElements = document.querySelectorAll('[id^="preview-"]');
@@ -33,18 +36,19 @@ window.addEventListener('load', function () {
             console.log('Image loaded successfully:', image);
 
             cornerstone.displayImage(element, image);
-         // Create a transparent overlay div to block interaction
-         const overlayDiv = document.createElement('div');
-         overlayDiv.style.position = 'absolute';
-         overlayDiv.style.top = '0'; // Aligns with top of the canvas
-         overlayDiv.style.left = '0'; // Aligns with left of the canvas
-         overlayDiv.style.width = element.offsetWidth+10 + 'px';
-         overlayDiv.style.height = element.offsetHeight + 'px';
-         overlayDiv.style.backgroundColor = 'transparent'; // Transparent overlay
-         overlayDiv.style.zIndex = '10'; // Ensure it's on top of the canvas
+            // Create a transparent overlay div to block interaction
+            const overlayDiv = document.createElement('div');
+            overlayDiv.className = 'overlay';
+            overlayDiv.style.position = 'absolute';
+            overlayDiv.style.top = '0'; // Aligns with top of the canvas
+            overlayDiv.style.left = '0'; // Aligns with left of the canvas
+            overlayDiv.style.width = element.offsetWidth + 10 + 'px';
+            overlayDiv.style.height = element.offsetHeight + 'px';
+            overlayDiv.style.backgroundColor = 'transparent'; // Transparent overlay
+            overlayDiv.style.zIndex = '10'; // Ensure it's on top of the canvas
 
-         // Append the overlayDiv to the parent container of the canvas
-         parentDiv.appendChild(overlayDiv); 
+            // Append the overlayDiv to the parent container of the canvas
+            parentDiv.appendChild(overlayDiv);
         }).catch((error) => {
             console.error('Error loading image:', error);
         });
@@ -54,6 +58,22 @@ window.addEventListener('load', function () {
 document.addEventListener('DOMContentLoaded', function () {
     console.log("DOMContentLoaded event triggered");
 
+    const checkboxes = document.querySelectorAll(".image-checkbox");
+    const maxSelection = 9;  // Maximum number of checkboxes that can be selected
+
+    // Attach event listener to each checkbox
+    checkboxes.forEach(function (checkbox) {
+        checkbox.addEventListener("change", function () {
+            // Get all selected checkboxes
+            const selectedCheckboxes = document.querySelectorAll(".image-checkbox:checked");
+
+            // If the number of selected checkboxes exceeds the limit, uncheck the current one
+            if (selectedCheckboxes.length > maxSelection) {
+                alert("You can select a maximum of 9 images.");
+                checkbox.checked = false;  // Uncheck the current checkbox
+            }
+        });
+    });
     // Configure CornerstoneWADOImageLoader to use the web worker
     const config = {
         useWebWorkers: true,
@@ -92,12 +112,6 @@ document.addEventListener('DOMContentLoaded', function () {
             },
         },
     ]);
-
-    console.log('cornerstoneTools', cornerstoneTools);
-    // Initialize Cornerstone Tools
-    cornerstoneTools.addTool(cornerstoneTools.WwwcTool);  // Window/Level tool
-    cornerstoneTools.setToolActive('Wwwc', { mouseButtonMask: 1 });  // Default to Window/Level
-
 
     // Activate tools on button click
     document.getElementById('activateWwwc').addEventListener('click', function () {
@@ -186,6 +200,82 @@ document.addEventListener('DOMContentLoaded', function () {
         cornerstoneTools.addTool(cornerstoneTools.EraserTool)
         cornerstoneTools.setToolActive('Eraser', { mouseButtonMask: 1 })
     });
+
+    document.getElementById('activateCine').addEventListener('click', function (e) {
+        const selectedCanvas = document.querySelector('.selected');
+        cornerstoneTools.playClip(selectedCanvas, 15);
+        console.log('Active Tools:', cornerstoneTools.getActiveTools);
+    });
+
+    document.getElementById('activateInvert').addEventListener('click', function (e) {
+        const selectedCanvas = document.querySelector('.selected');
+        cornerstone.enable(selectedCanvas);
+        const viewport = cornerstone.getViewport(selectedCanvas);
+        viewport.invert = !viewport.invert;
+        cornerstone.setViewport(selectedCanvas, viewport);
+    });
+
+    document.getElementById('resetTools').addEventListener('click', function () {
+        const selectedCanvas = document.querySelector('.selected');
+        if (selectedCanvas) {
+            cornerstone.reset(selectedCanvas);
+        } else {
+            alert('Please select a canvas first.');
+        }
+    });
+
+    document.getElementById('activateStackScroll').addEventListener('click', function (e) {
+        cornerstoneTools.addTool(cornerstoneTools.StackScrollMouseWheelTool);
+        const selectedCanvas = document.querySelector('.selected');
+        console.log({ selectedCanvas });
+        cornerstoneTools.setToolActive('StackScrollMouseWheel', { mouseButtonMask: 1, frameRate: 1 });
+        if (selectedCanvas) {
+            cornerstoneTools.getToolState('StackScrollMouseWheel').isMouseWheelActive = true;
+            cornerstoneTools.setToolActiveForElement(selectedCanvas, 'StackScrollMouseWheel');
+        }
+        // cornerstoneTools.setToolActive('StackScrollMouseWheel', { mouseButtonMask: 1, frameRate: 1 });
+        console.log('Active Tools:', cornerstoneTools.getActiveTools);
+    });
+
+    document.getElementById('saveToolData').addEventListener('click', function () {
+        const selectedCanvas = document.querySelector('.selected');  // Get the currently selected canvas
+        if (selectedCanvas) {
+            const toolState = cornerstoneTools.globalImageIdSpecificToolStateManager.saveToolState();  // Get tool state for the current canvas
+            console.log({ toolState });
+            const imageId = cornerstone.getEnabledElement(selectedCanvas).image.imageId;  // Get the current imageId
+            const imageToolState = toolState[imageId];  // Get the tool state data for the specific image
+    
+            // Convert to JSON and save (could be to a server, localStorage, etc.)
+            const toolStateJSON = JSON.stringify(imageToolState);
+            localStorage.setItem('savedToolData', toolStateJSON);  // Save to localStorage for simplicity
+            console.log("Tool data saved:", toolStateJSON);
+        } else {
+            alert('Please select a canvas first.');
+        }
+    });
+
+    document.getElementById('loadToolData').addEventListener('click', function () {
+        const selectedCanvas = document.querySelector('.selected');  // Get the currently selected canvas
+        if (selectedCanvas) {
+            const savedToolData = localStorage.getItem('savedToolData');  // Retrieve the saved tool data from localStorage
+    
+            if (savedToolData) {
+                const parsedToolData = JSON.parse(savedToolData);  // Parse the saved tool data
+                const imageId = cornerstone.getEnabledElement(selectedCanvas).image.imageId;  // Get the current imageId
+    
+                // Load the parsed tool data into the tool state manager for the specific image
+                const toolState = { [imageId]: parsedToolData };
+                cornerstoneTools.globalImageIdSpecificToolStateManager.restoreToolState(toolState);
+                cornerstone.updateImage(selectedCanvas);  // Refresh the image to show the restored data
+                console.log("Tool data loaded successfully");
+            } else {
+                alert('No tool data found to load.');
+            }
+        } else {
+            alert('Please select a canvas first.');
+        }
+    });
+    
 });
 
 
@@ -241,6 +331,8 @@ function createCanvases(layout) {
     const dicomViewerContainer = document.getElementById('dicomViewerContainer');
     dicomViewerContainer.innerHTML = '';  // Clear existing canvases
 
+    let newCanvasIds = [];  // Store new canvas IDs based on the new layout
+
     for (let i = 0; i < rows; i++) {
         for (let j = 0; j < cols; j++) {
             const div = document.createElement('div');
@@ -254,6 +346,8 @@ function createCanvases(layout) {
             // Assign unique IDs for each canvas
             const uniqueId = `canvas-${i}-${j}`;
             div.setAttribute('id', uniqueId);  // Assign a unique ID to each canvas div
+
+            newCanvasIds.push(uniqueId);  // Keep track of new canvas IDs
 
             div.innerHTML = `
             <div id="patientDetails1-${uniqueId}" class="patientDetails" style="position: absolute; top: 0; left: 0;">
@@ -289,6 +383,20 @@ function createCanvases(layout) {
             });
         }
     }
+
+    // Load previously stored images into the new canvases if available
+    console.log({ storedImages });
+    let canvasIndex = 0;
+    for (const [canvasId, imageId] of Object.entries(storedImages)) {
+        if (canvasIndex < newCanvasIds.length) {
+            const tCanvas = document.getElementById(newCanvasIds[canvasIndex]);
+            cornerstone.enable(tCanvas);
+            loadImage(imageId, tCanvas);
+            canvasIndex++;
+        } else {
+            delete storedImages[canvasId];  // Clear the stored image for this canvas
+        }
+    }
 }
 
 // Set default layout to 1x1
@@ -306,6 +414,97 @@ function handleDragOver(event) {
     event.preventDefault();
 }
 
+function loadImage(imageId, element) {
+    cornerstoneTools.stopClip(element);
+    const fileName = imageId.split('/').pop();
+    const extension = fileName.split('.').pop().toLowerCase();
+    // Load and display the image in the target canvas
+    cornerstone.loadImage(imageId).then(function (image) {
+        const imageData = image.data; // Retrieve the image data
+
+        if (extension === 'dcm') {
+            const dataSet = image.data;
+            const numFrames = dataSet.string('x00280008')
+            const FrameRate = 1000 / dataSet.floatString('x00181063');
+            if (imageData) {
+                console.log('numFrames:', numFrames);
+                const imageIds = [];
+                for (var i = 0; i < numFrames; i++) {
+                    const imageIdR = imageId + "?frame=" + i;
+                    imageIds.push(imageIdR);
+                }
+                const stack = {
+                    currentImageIdIndex: 0,
+                    imageIds: imageIds
+                };
+                console.log({ imageId })
+                if (numFrames > 1) {
+                    cornerstone.loadAndCacheImage(imageIds[0]).then(function (image) {
+                        cornerstoneWADOImageLoader.wadouri.dataSetCacheManager.unload(imageId);
+
+                        cornerstone.displayImage(element, image);
+                        cornerstone.reset(element);
+
+                        cornerstoneTools.addStackStateManager(element, ['stack', 'playClip']);
+                        cornerstoneTools.addToolState(element, 'stack', stack);
+
+
+                        loaded = true;
+                    }, function (err) {
+                        alert(err);
+                    });
+                } else {
+                    cornerstone.displayImage(element, image);
+                    cornerstone.reset(element);
+                }
+            } else {
+                cornerstone.displayImage(element, image);
+                cornerstone.reset(element);
+            }
+
+            const defaultViewport = cornerstone.getDefaultViewportForImage(element, image);
+            cornerstone.setViewport(element, defaultViewport);
+
+            // Extract and display DICOM metadata
+            const uniqueId = element.id;
+            // Example: update patient details in the canvas div
+            document.getElementById(`patientId-${uniqueId}`).textContent = `${dataSet.string('x00100020') || 'N/A'}`;
+            document.getElementById(`patientName-${uniqueId}`).textContent = `Patient Name: ${dataSet.string('x00100010') || 'N/A'}`;
+            document.getElementById(`patientGender-${uniqueId}`).textContent = `Patient Gender: ${dataSet.string('x00100040') || 'N/A'}`;
+            document.getElementById(`patientBirth-${uniqueId}`).textContent = `Patient BirthDate: ${dataSet.string('x00100030') || 'N/A'}`;
+            document.getElementById(`studyDescription-${uniqueId}`).textContent = `${dataSet.string('x0008103e') || 'N/A'}`;
+            document.getElementById(`studyDate-${uniqueId}`).textContent = `Study Date: ${dataSet.string('x00080020') || 'N/A'}`;
+            document.getElementById(`width-${uniqueId}`).textContent = `Width: ${dataSet.uint16('x00280010') || 'N/A'}`;
+            document.getElementById(`length-${uniqueId}`).textContent = `Length: ${dataSet.uint16('x00280011') || 'N/A'}`;
+            // Add more metadata as needed
+        } else {
+            // Reset viewport and clear details for non-DICOM files
+            const defaultWebViewport = {
+                invert: false,
+                voi: {
+                    windowWidth: 255,
+                    windowCenter: 128
+                }
+            };
+            cornerstone.setViewport(element, defaultWebViewport);
+            cornerstone.displayImage(element, image);
+            cornerstone.reset(element);
+        }
+
+        element.addEventListener('cornerstoneimagerendered', function (e) {
+            const viewport = cornerstone.getViewport(e.target);
+            const zoom = viewport.scale.toFixed(2);
+            const wwc = `W: ${viewport.voi.windowWidth.toFixed(2)}, L: ${viewport.voi.windowCenter.toFixed(2)}`;
+    
+            const uniqueId = e.target.id;
+            document.getElementById(`zoom-${uniqueId}`).textContent = `Zoom: ${zoom}`;
+            document.getElementById(`wwc-${uniqueId}`).textContent = `Wwc: ${wwc}`;
+        });
+    
+    }).catch(function (err) {
+        console.error('Error loading image:', err);
+    });
+}
 function handleDrop(event) {
     event.preventDefault();
     const targetCanvas = event.target.closest('.dicomViewer');  // Get the canvas where the file is dropped
@@ -335,94 +534,11 @@ function handleDrop(event) {
         return;
     }
 
-    // Load and display the image in the target canvas
-    cornerstone.loadImage(imageId).then(function (image) {
-        const imageData = image.data; // Retrieve the image data
+    // Store the image in the global variable for persistence across layouts
+    storedImages[targetCanvas.id] = imageId;
+    loadImage(imageId, targetCanvas);
 
-        // Check if imageData is valid and contains the necessary metadata
-
-        //   console.log('Image data:', imageData.string('x00280008'));
-
-
-        if (extension === 'dcm') {
-            const dataSet = image.data;
-            const numFrames = dataSet.string('x00280008')
-            const FrameRate = 1000 / dataSet.floatString('x00181063');
-            if (imageData) {
-                console.log('numFrames:', numFrames);
-                const imageIds = [];
-                for (var i = 0; i < numFrames; i++) {
-                    const imageIdR = imageId + "?frame=" + i;
-                    imageIds.push(imageIdR);
-                }
-                const stack = {
-                    currentImageIdIndex: 0,
-                    imageIds: imageIds
-                };
-                console.log({imageId})
-                if(numFrames > 1 && numFrames !== undefined){
-                cornerstone.loadAndCacheImage(imageIds[0]).then(function (image) {
-                    // console.log(image);
-                    // now that we have an image frame in the cornerstone cache, we can decrement
-                    // the reference count added by load() above when we loaded the metadata.  This way
-                    // cornerstone will free all memory once all imageId's are removed from the cache
-                    cornerstoneWADOImageLoader.wadouri.dataSetCacheManager.unload(imageId);
-
-                    cornerstone.displayImage(targetCanvas, image);
-                    // if(loaded === false) {
-                    // cornerstoneTools.wwwc.activate(targetCanvas, 1); // ww/wc is the default tool for left mouse button
-                    // const ScaleOverlayTool = cornerstoneTools.ScaleOverlayTool;
-
-                    // cornerstoneTools.addTool(ScaleOverlayTool)
-                    // cornerstoneTools.setToolActive('ScaleOverlay', { mouseButtonMask: 1 })
-                    // Set the stack as tool state
-                    cornerstoneTools.addStackStateManager(targetCanvas, ['stack', 'playClip']);
-                    cornerstoneTools.addToolState(targetCanvas, 'stack', stack);
-
-
-                    loaded = true;
-                }, function (err) {
-                    alert(err);
-                });
-                } else {
-                    cornerstone.displayImage(targetCanvas, image);
-                }
-            } else {
-                cornerstone.displayImage(targetCanvas, image);
-            }
-
-            const defaultViewport = cornerstone.getDefaultViewportForImage(targetCanvas, image);
-            cornerstone.setViewport(targetCanvas, defaultViewport);
-
-            // Extract and display DICOM metadata
-            const uniqueId = targetCanvas.id;
-            // Example: update patient details in the canvas div
-            document.getElementById(`patientId-${uniqueId}`).textContent = `${dataSet.string('x00100020') || 'N/A'}`;
-            document.getElementById(`patientName-${uniqueId}`).textContent = `Patient Name: ${dataSet.string('x00100010') || 'N/A'}`;
-            document.getElementById(`patientGender-${uniqueId}`).textContent = `Patient Gender: ${dataSet.string('x00100040') || 'N/A'}`;
-            document.getElementById(`patientBirth-${uniqueId}`).textContent = `Patient BirthDate: ${dataSet.string('x00100030') || 'N/A'}`;
-            document.getElementById(`studyDescription-${uniqueId}`).textContent = `${dataSet.string('x0008103e') || 'N/A'}`;
-            document.getElementById(`studyDate-${uniqueId}`).textContent = `Study Date: ${dataSet.string('x00080020') || 'N/A'}`;
-            document.getElementById(`width-${uniqueId}`).textContent = `Width: ${dataSet.uint16('x00280010') || 'N/A'}`;
-            document.getElementById(`length-${uniqueId}`).textContent = `Length: ${dataSet.uint16('x00280011') || 'N/A'}`;
-            // Add more metadata as needed
-        } else {
-            // Reset viewport and clear details for non-DICOM files
-            const defaultWebViewport = {
-                invert: false,
-                voi: {
-                    windowWidth: 255,
-                    windowCenter: 128
-                }
-            };
-            cornerstone.setViewport(targetCanvas, defaultWebViewport);
-            cornerstone.displayImage(targetCanvas, image);
-        }
-    }).catch(function (err) {
-        console.error('Error loading image:', err);
-    });
-
-    cornerstoneTools.stopClip(targetCanvas);
+    // 
 
     targetCanvas.addEventListener('cornerstoneimagerendered', function (e) {
         const viewport = cornerstone.getViewport(e.target);
@@ -434,73 +550,6 @@ function handleDrop(event) {
         document.getElementById(`wwc-${uniqueId}`).textContent = `Wwc: ${wwc}`;
     });
 
-    document.getElementById('resetTools').addEventListener('click', function () {
-        const selectedCanvas = document.querySelector('.selected');
-        if (selectedCanvas) {
-            cornerstone.reset(selectedCanvas);
-        } else {
-            alert('Please select a canvas first.');
-        }
-    });
-
-    document.getElementById('lRotate').addEventListener('click', function (e) {
-        console.log({ lRotata: 'lrotate clicked' });
-        const selectedCanvas = document.querySelector('.selected');
-        console.log({ selectedCanvas });
-        const viewport = cornerstone.getViewport(selectedCanvas);
-        viewport.rotation -= 90;
-        cornerstone.setViewport(selectedCanvas, viewport);
-    });
-
-    document.getElementById('rRotate').addEventListener('click', function (e) {
-        console.log({ rRotata: 'rrotate clicked' });
-        const selectedCanvas = document.querySelector('.selected');
-        console.log({ selectedCanvas });
-        const viewport = cornerstone.getViewport(selectedCanvas);
-        viewport.rotation += 90;
-        cornerstone.setViewport(selectedCanvas, viewport);
-    });
-
-    document.getElementById('hFlip').addEventListener('click', function (e) {
-        const selectedCanvas = document.querySelector('.selected');
-        console.log({ selectedCanvas });
-        const viewport = cornerstone.getViewport(selectedCanvas);
-        viewport.hflip = !viewport.hflip;
-        cornerstone.setViewport(selectedCanvas, viewport);
-    });
-
-    document.getElementById('vFlip').addEventListener('click', function (e) {
-        const selectedCanvas = document.querySelector('.selected');
-        const viewport = cornerstone.getViewport(selectedCanvas);
-        viewport.vflip = !viewport.vflip;
-        cornerstone.setViewport(selectedCanvas, viewport);
-    });
-
-    document.getElementById('activateStackScroll').addEventListener('click', function (e) {
-        cornerstoneTools.addTool(cornerstoneTools.StackScrollMouseWheelTool);
-        const selectedCanvas = document.querySelector('.selected');
-        console.log({ selectedCanvas });
-        cornerstoneTools.setToolActive('StackScrollMouseWheel', { mouseButtonMask: 1, frameRate: 1 });
-        if (selectedCanvas) {
-            cornerstoneTools.getToolState('StackScrollMouseWheel').isMouseWheelActive = true;
-            cornerstoneTools.setToolActiveForElement(selectedCanvas, 'StackScrollMouseWheel');
-        }
-        // cornerstoneTools.setToolActive('StackScrollMouseWheel', { mouseButtonMask: 1, frameRate: 1 });
-        console.log('Active Tools:', cornerstoneTools.getActiveTools);
-    });
-
-    document.getElementById('activateCine').addEventListener('click', function (e) {
-        const selectedCanvas = document.querySelector('.selected');
-        cornerstoneTools.playClip(selectedCanvas, 15);
-        console.log('Active Tools:', cornerstoneTools.getActiveTools);
-    });
-
-    document.getElementById('activateInvert').addEventListener('click', function (e) {
-        const selectedCanvas = document.querySelector('.selected');
-        const viewport = cornerstone.getViewport(selectedCanvas);
-        viewport.invert = !viewport.invert;
-        cornerstone.setViewport(selectedCanvas, viewport);
-    });
 }
 
 window.onload = function () {
@@ -525,138 +574,6 @@ window.onload = function () {
     targetCanvas.addEventListener('drop', handleDrop);
 };
 
-function loadAndViewImage(targetElement, imageUrl) {
-    const extension = imageUrl.split('.').pop().toLowerCase();
-    let imageId;
-
-    // Use different imageId formats based on the file type
-    if (extension === 'dcm') {
-        imageId = 'wadouri:' + imageUrl;  // Use wadouri for DICOM
-    } else if (['jpg', 'jpeg', 'png'].includes(extension)) {
-        imageId = imageUrl; // Use webimage for PNG, JPG
-    } else {
-        console.error('Unsupported file format:', extension);
-        return;
-    }
-
-    console.log("ImageId:", imageId);
-    cornerstone.loadImage(imageId).then(function (image) {
-        console.log("Image loaded successfully:", image);
-        targetElement.draggable = true;
-        // Display the image on the canvas
-        cornerstone.displayImage(targetElement, image);
-        const defaultViewport = cornerstone.getDefaultViewportForImage(targetElement, image);
-        cornerstone.setViewport(targetElement, defaultViewport);
-    }).catch(function (err) {
-        console.error('Error loading image:', err);
-    });
-}
-
-// window.addEventListener('load', function () {
-
-//     // Fetch all the preview elements
-//     const previewElements = document.querySelectorAll('[id^="preview-"]');
-//     console.log("Preview Elements:", previewElements);
-
-//     // Iterate over the preview elements
-//     previewElements.forEach((element) => {
-//         const parentDiv = element.parentElement;
-//         const dataUrl = parentDiv.getAttribute('data-url');
-//         console.log("File URL:", dataUrl);
-//         const filename = dataUrl.split('/').pop();
-//         const extension = filename.split('.').pop().toLowerCase();
-
-//         if (extension === 'dcm') {
-//             fetchDcmAndRender(dataUrl, element);
-//         } else if (['jpg', 'jpeg', 'png'].includes(extension)) {
-//             // Handle regular image preview
-//             const imgElement = document.createElement('img');
-//             imgElement.src = dataUrl;
-//             imgElement.style.width = '100%';
-//             imgElement.style.height = '100%';
-//             element.appendChild(imgElement);
-//         } else {
-//             console.error('Unsupported file format:', extension);
-//         }
-//     });
-
-//     function fetchDcmAndRender(dataUrl, element) {
-//         fetch(dataUrl)
-//             .then(response => response.arrayBuffer())
-//             .then(buffer => {
-//                 const byteArray = new Uint8Array(buffer);
-//                 const dataSet = dicomParser.parseDicom(byteArray);
-//                 const pixelDataElement = dataSet.elements.x7fe00010;
-
-//                 if (pixelDataElement) {
-//                     const pixelData = new Uint16Array(
-//                         dataSet.byteArray.buffer,
-//                         pixelDataElement.dataOffset,
-//                         pixelDataElement.length / 2
-//                     );
-//                     const rows = dataSet.uint16('x00280010');
-//                     const cols = dataSet.uint16('x00280011');
-//                     const bitsAllocated = dataSet.uint16('x00280100');
-
-//                     // Render the image
-//                     renderToCanvas(pixelData, rows, cols, bitsAllocated, element, dataSet);
-//                 } else {
-//                     console.error('No pixel data found in the DICOM file.');
-//                 }
-//             })
-//             .catch(error => console.error('Error fetching or parsing DICOM file:', error));
-//     }
-
-//     function renderToCanvas(pixelData, rows, cols, bitsAllocated, element, windowCenter = 40, windowWidth = 80, dataSet) {
-//         const canvas = document.createElement('canvas');
-//         const ctx = canvas.getContext('2d');
-//         canvas.width = cols;
-//         canvas.height = rows;
-
-//         const imageData = ctx.createImageData(cols, rows);
-
-//         // Apply windowing based on Rescale Slope and Intercept (if available)
-//         const rescaleSlope = dataSet.float32('x00280102') || 1.0;
-//         const rescaleIntercept = dataSet.float32('x00280100') || 0.0;
-
-//         // Normalize pixel values to the range of 0-255
-//         for (let i = 0; i < pixelData.length; i++) {
-//             const pixelValue = pixelData[i];
-//             // Apply rescaling
-//             const windowedPixelValue = (pixelValue * rescaleSlope) + rescaleIntercept;
-
-//             // Check if windowedPixelValue falls within the window range
-//             if (windowedPixelValue < windowCenter - windowWidth / 2) {
-//                 windowedPixelValue = windowCenter - windowWidth / 2;
-//             } else if (windowedPixelValue > windowCenter + windowWidth / 2) {
-//                 windowedPixelValue = windowCenter + windowWidth / 2;
-//             }
-
-//             // Normalize the windowed pixel value to 0-255
-//             const normalizedValue = Math.round((windowedPixelValue / 255) * 255);
-
-//             const idx = i * 4;
-//             imageData.data[idx] = normalizedValue; // Red channel
-//             imageData.data[idx + 1] = normalizedValue; // Green channel
-//             imageData.data[idx + 2] = normalizedValue; // Blue channel
-//             imageData.data[idx + 3] = 255; // Alpha channel (fully opaque)
-//         }
-
-//         ctx.putImageData(imageData, 0, 0);
-
-//         // Convert canvas to PNG for preview
-//         const pngDataUrl = canvas.toDataURL('image/png');
-//         const imgElement = document.createElement('img');
-//         imgElement.src = pngDataUrl;
-//         imgElement.style.width = '100%';
-//         imgElement.style.height = '100%';
-
-//         // Append the PNG preview to the element
-//         element.appendChild(imgElement);
-//     }
-// });
-
-
 document.addEventListener('DOMContentLoaded', function () {
     const dropdowns = document.querySelectorAll('.date-dropdown');
 
@@ -666,5 +583,108 @@ document.addEventListener('DOMContentLoaded', function () {
             gallery.style.display = (gallery.style.display === 'none' || gallery.style.display === '') ? 'flex' : 'none';
             this.classList.toggle('open'); // Toggle open class to rotate the arrow
         });
+    });
+});
+
+function renderImagesOnCanvases(selectedImages, layout) {
+    const [rows, cols] = layout.split('x').map(Number);
+    let imageIndex = 0;  // Track the index of the current image to be rendered
+
+    // Loop through each cell in the layout and render the corresponding image
+    for (let i = 0; i < rows; i++) {
+        for (let j = 0; j < cols; j++) {
+            if (imageIndex >= selectedImages.length) return;  // Exit if all images are rendered
+
+            const uniqueId = `canvas-${i}-${j}`;
+            const targetCanvas = document.getElementById(uniqueId);
+
+            // Enable cornerstone for this canvas
+            cornerstone.enable(targetCanvas);
+
+            // Get the URL and determine the imageId based on file type
+            const url = selectedImages[imageIndex];
+            console.log({ url });
+            const fileName = url.split('/').pop();
+            const extension = fileName.split('.').pop().toLowerCase();
+
+
+            let imageId;
+            console.log('extension:', extension);
+            // Use different imageId formats based on the file type
+            if (extension === 'dcm') {
+                imageId = 'wadouri:' + url;  // Use wadouri for DICOM
+            } else if (['jpg', 'jpeg', 'png'].includes(extension)) {
+                console.log('url:', url);
+                const baseUrl = "http://localhost:5000";
+                // const pathname = new URL(url).pathname;
+                imageId = baseUrl + url;
+                console.log('imageId: ', imageId || undefined);
+            } else {
+                console.error('Unsupported file format:', extension);
+                continue;
+            }
+            loadImage(imageId, targetCanvas);
+
+            // Store the image in the global variable for persistence across layouts
+            storedImages[targetCanvas.id] = imageId;
+            // Attach tool activation for the new canvas
+            cornerstoneTools.addTool(cornerstoneTools.StackScrollMouseWheelTool);
+            cornerstoneTools.setToolActiveForElement(targetCanvas, 'StackScrollMouseWheel', { mouseButtonMask: 1 });
+
+            // Set up playClip for cine mode
+            cornerstoneTools.setToolActiveForElement(targetCanvas, 'playClip', { frameRate: 30 });
+
+            imageIndex++;  // Move to the next image
+        }
+    }
+}
+
+function findBestLayout(numImages) {
+    const layouts = {
+        1: '1x1',
+        2: '1x2',
+        3: '1x3',
+        4: '2x2',
+        5: '2x3',
+        6: '2x3',
+        7: '3x3',
+        8: '3x3',
+        9: '3x3'
+    };
+
+    // Return the layout based on the number of images, or default to '3x3'
+    return layouts[numImages] || '3x3';
+}
+
+document.getElementById("openButton").addEventListener("click", function () {
+    // Array to hold the selected image URLs
+    let selectedImages = [];
+
+    // Get all the checkboxes
+    const checkboxes = document.querySelectorAll(".image-checkbox");
+
+    // Loop through the checkboxes and check if they are selected
+    checkboxes.forEach(function (checkbox) {
+        if (checkbox.checked) {
+            // Get the URL from the data-url attribute of the parent div (previewSquare)
+            const imageUrl = checkbox.closest(".previewSquare").getAttribute("data-url");
+            // Add the image URL to the array
+            selectedImages.push(imageUrl);
+        }
+    });
+
+    // Log the selected images URLs
+    console.log("Selected Images:", selectedImages);
+
+    const layout = findBestLayout(selectedImages.length);
+    console.log("Best Layout:", layout);
+
+    storedImages = {};
+    createCanvases(layout);
+
+    renderImagesOnCanvases(selectedImages, layout);
+
+    checkboxes.forEach(function (checkbox) {
+        checkbox.checked = false;
     });
 });

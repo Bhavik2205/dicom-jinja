@@ -5,6 +5,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>DICOM Viewer</title>
+        <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
         <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
         <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
 
@@ -27,24 +28,7 @@
                 src="https://cdn.jsdelivr.net/npm/cornerstone-web-image-loader@2.1.1/dist/cornerstoneWebImageLoader.min.js"></script>
         <script
                 src="https://cdn.jsdelivr.net/npm/cornerstone-file-image-loader@0.3.0/dist/cornerstoneFileImageLoader.min.js"></script>
-        <!-- <script src="https://cdn.jsdelivr.net/npm/tiff@6.1.1/lib/index.min.js"></script> -->
-        <!-- <script>
-                const config = {
-                        useWebWorkers: true,
-                        webWorkerPath: "https://cdn.jsdelivr.net/npm/cornerstone-wado-image-loader@3.0.6/dist/cornerstoneWADOImageLoaderWebWorker.min.js", // Correct path
-                        taskConfiguration: {
-                                'decodeTask': {
-                                        codecsPath: 'https://cdn.jsdelivr.net/npm/cornerstone-wado-image-loader@3.0.6/dist/cornerstoneWADOImageLoaderCodecs.min.js'
-                                }
-                        }
-                };
-                cornerstoneWebImageLoader.external.cornerstone = cornerstone;
-                cornerstoneFileImageLoader.external.cornerstone = cornerstone
-                cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
-                cornerstoneWADOImageLoader.external.dicomParser = dicomParser;
-                cornerstoneWADOImageLoader.external.cornerstone = cornerstone;
-                cornerstoneWADOImageLoader.webWorkerManager.initialize(config);
-        </script> -->
+
 </head>
 
 <body>
@@ -68,8 +52,14 @@
                                         <a href="#" onclick="createCanvases('3x2')">3 x 2</a>
                                         <a href="#" onclick="createCanvases('3x3')">3 x 3</a>
                                 </div>
+                                <button id="activatePan" class="icon-button"><span
+                                                class="material-icons">open_with</span><br>Pan</button>
+                                <button id="activateZoom" class="icon-button"><span
+                                                class="material-icons">zoom_in</span><br>Zoom</button>
                                 <button id="activateInvert" class="icon-button"><span
                                                 class="material-icons">invert_colors</span><br>Invert</button>
+                                <button id="activateMagnify" class="icon-button"><span
+                                                class="material-icons">search</span><br>Magnify</button>
                                 <button id="activateRectangle" class="icon-button"><span
                                                 class="material-icons">crop_square</span><br>Rectangle</button>
                                 <button id="activateCircle" class="icon-button"><span
@@ -79,24 +69,11 @@
                                                 alt="Elliptical Roi" class="icon-img"><br>Elliptical</button>
                                 <button id="activateArrowAnnotate" class="icon-button"><span
                                                 class="material-icons">call_received</span><br>Arrow</button>
-                                <button id="activatePan" class="icon-button"><span
-                                                class="material-icons">open_with</span><br>Pan</button>
-                                <button id="activateZoom" class="icon-button"><span
-                                                class="material-icons">zoom_in</span><br>Zoom</button>
-                                <button id="activateMagnify" class="icon-button"><span
-                                                class="material-icons">search</span><br>Magnify</button>
-                                <button id="hFlip" type="button" class="icon-button"><img
-                                                src="{{ url_for('static', filename='icons/hflip.png') }}" alt="HFlip"
-                                                class="icon-img"><br>HFlip</button>
-                                <button id="vFlip" type="button" class="icon-button"><img
-                                                src="{{ url_for('static', filename='icons/vflip.png') }}" alt="VFlip"
-                                                class="icon-img"><br>VFlip</button>
-                                <button id="rRotate" type="button" class="icon-button"><span
-                                                class="material-icons">rotate_right</span><br>R. Right</button>
-                                <button id="lRotate" type="button" class="icon-button"><span
-                                                class="material-icons">rotate_left</span><br>R. Left</button>
+
                                 <button id="moreButton" onclick="toggleMoreButtons()" class="icon-button"><span
                                                 class="material-icons">more_horiz</span><br>More</button>
+                                <!-- <button id="saveToolData">Save Tool Data</button>
+                                <button id="loadToolData">Load Tool Data</button> -->
 
                                 <!-- Hidden buttons, revealed when "More" is clicked -->
                                 <div id="moreMenu" class="hidden">
@@ -133,14 +110,21 @@
         <!-- <h2>DICOM Viewer</h2> -->
         <div id="block">
                 <div id="sidebar">
-                        <h3>File Previews</h3>
+                        <!-- Upload button beside File Preview -->
+                        <div
+                                style="display: flex; align-items: center; margin-bottom: 10px; justify-content: space-between;">
+                                <h3>File Previews</h3>
+                                <button id="openButton"
+                                        style="padding: 8px 15px; font-size: 14px; cursor: pointer;">Open</button>
+                        </div>
                         <div id="previewList">
                                 {% for date, files in files_by_date.items() %}
                                 <!-- <h4>{{ date }}</h4> -->
-                                <div class="date-dropdown" style="border: 1px solid #ccc; margin: 15px 0 0px; padding: 5px; cursor: pointer;">
+                                <div class="date-dropdown"
+                                        style="border: 1px solid #ccc; margin: 15px 0 0px; padding: 5px; height: 25px !important; cursor: pointer;">
                                         <span style="margin-right: 10px;">{{ date }}</span>
                                         <span class="arrow">&#9662;</span> <!-- Down arrow -->
-                                    </div>
+                                </div>
                                 <div style="display: flex; flex-wrap: wrap; gap: 0; justify-content: flex-start;">
                                         {% for file in files %}
                                         <div class="previewSquare" draggable="true"
@@ -151,6 +135,8 @@
                                                         <div id="preview-{{ loop.index }}"
                                                                 style="width: 90%; height: 90%; position: relative;">
                                                         </div>
+                                                        <input type="checkbox" class="image-checkbox"
+                                                                style="position: absolute; bottom: 5px; right: 5px; z-index: 20; width: 15px; height: 15px; background-color: transparent;">
                                                 </div>
                                         </div>
                                         {% endfor %}
