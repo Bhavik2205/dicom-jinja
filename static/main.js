@@ -303,7 +303,7 @@ function toggleLayoutButton() {
 document.querySelectorAll('.icon-button').forEach(button => {
     // cornerstoneTools.stopClip();
     button.addEventListener('click', () => {
-        if (button.id !== 'moreButton' && button.id !== 'addFile' && button.id !== 'resetTools' && button.id !== 'layout' && button.id !== 'lRotate' && button.id !== 'rRotate' && button.id !== 'hFlip' && button.id !== 'vFlip' && button.id !== 'activateInvert') {
+        if (button.id !== 'activateEnface' && button.id !== 'moreButton' && button.id !== 'addFile' && button.id !== 'resetTools' && button.id !== 'layout' && button.id !== 'lRotate' && button.id !== 'rRotate' && button.id !== 'hFlip' && button.id !== 'vFlip' && button.id !== 'activateInvert') {
             button.classList.add('active'); // Add active class first
             document.querySelectorAll('.icon-button').forEach(btn => {
                 if (btn !== button) { // Only remove active from other buttons

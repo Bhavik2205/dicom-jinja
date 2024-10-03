@@ -37,6 +37,13 @@
                 <div class="button-container-wrapper">
                         <div class="button-container">
                                 <!-- <button id="activateWwwc">Window / Level</button> -->
+                                <button id="activateEnface" class="icon-button" onclick="selectFolder()"><img
+                                                src="{{ url_for('static', filename='icons/ai.png') }}" alt="Enface"
+                                                class="icon-img"><br>Enface</button>
+                                <!-- <button id="activateEnface" class="icon-button" onclick="selectFolder()"><span
+                                                class="material-icons">image</span><br>Enface</button> -->
+                                <input type="file" id="folderInput" webkitdirectory directory style="display:none;"
+                                        onchange="processFolder()" />
                                 <button id="activateWwwc" class="icon-button"><span
                                                 class="material-icons">contrast</span><br>Window / Level</button>
                                 <button id="layout" onclick="toggleLayoutButton()" class="icon-button"><span
@@ -107,8 +114,21 @@
                 <button id="addFile" class="icon-button"><span class="material-icons">add_circle</span><br>Add
                         File</button>
         </header>
+        <div id="loader"
+                style="display: none; position: fixed; top: 56%; left: 56%; transform: translate(-50%, -50%); z-index: 20;">
+                <div id="overlay"
+                        style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(255, 255, 255, 0.5); filter: blur(10px);">
+                </div>
+                <div id="loader-container"
+                        style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) rotateX(0deg);">
+                        <img src="{{ url_for('static', filename='logo.png') }}" alt="Loading"
+                                style="width: 150px; height: 150px;">
+                </div>
+        </div>
         <!-- <h2>DICOM Viewer</h2> -->
         <div id="block">
+                <!-- Loader -->
+
                 <div id="sidebar">
                         <!-- Upload button beside File Preview -->
                         <div
@@ -160,7 +180,33 @@
                         </form>
                 </div>
         </div>
+        <style>
+                @keyframes spinX {
+                        0% {
+                                transform: translate(-50%, -50%) rotateY(0deg);
+                        }
+
+                        50% {
+                                transform: translate(-50%, -50%) rotateY(180deg);
+                        }
+
+                        100% {
+                                transform: translate(-50%, -50%) rotateY(360deg);
+                        }
+                }
+
+                /* Apply animation to loader */
+                #loader-container img {
+                        animation: spinX 2s linear infinite;
+                }
+
+                #overlay {
+                        backdrop-filter: blur(10px);
+                        -webkit-backdrop-filter: blur(10px);
+                }
+        </style>
         <script src="{{ url_for('static', filename='main.js') }}"></script>
+        <script src="{{ url_for('static', filename='phase2.js') }}"></script>
 </body>
 
 </html>
