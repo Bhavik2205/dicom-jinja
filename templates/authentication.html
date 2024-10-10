@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DICOM Viewer</title>
+    <link rel="icon" type="image/png" href="{{ url_for('static', filename='logo.png') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='authentication.css') }}">
+    <script>
+        // Function to toggle between signup and login forms
+        function showForm(formType) {
+            var signupForm = document.getElementById("signupForm");
+            var loginForm = document.getElementById("loginForm");
+
+            if (formType === 'signup') {
+                signupForm.classList.add("active");
+                loginForm.classList.remove("active");
+            } else {
+                signupForm.classList.remove("active");
+                loginForm.classList.add("active");
+            }
+        }
+
+        // Display the appropriate form on page load
+        window.onload = function() {
+            showForm('login'); // Default to showing the login form
+        }
+    </script>
+</head>
+<body>
+    <img src="{{ url_for('static', filename='logoFull.png') }}" alt="Company Logo" class="logo">
+    <div class="container">
+        <!-- Signup Form -->
+        <div id="signupForm" class="form-container">
+            <h2>Create your Account</h2>
+            <p class="subheading">Enter your details to create a new account</p>
+            <form action="/handle_signup_login" method="POST">
+                <input type="hidden" name="signup" value="true">
+                <input type="text" name="name" placeholder="Enter your name" required><br>
+                <input type="text" name="email" placeholder="Enter your email" required><br>
+                <input type="password" name="password" placeholder="Create password" required><br>
+                <button type="submit">Signup</button>
+            </form>
+            <p class="redirect-text">Already have an account? <span onclick="showForm('login')" class="redirect-link">Sign in</span></p>
+        </div>
+
+        <!-- Login Form -->
+        <div id="loginForm" class="form-container">
+            <h2>Welcome Back</h2>
+            <p class="subheading">Sign in to continue</p>
+            <form action="/handle_signup_login" method="POST">
+                <input type="hidden" name="login" value="true">
+                <input type="text" name="email" placeholder="Enter your email" required><br>
+                <input type="password" name="password" placeholder="Enter password" required><br>
+                <button type="submit">Login</button>
+            </form>
+            <p class="redirect-text">New here? <span onclick="showForm('signup')" class="redirect-link">Create an account</span></p>
+        </div>
+    </div>
+</body>
+</html>

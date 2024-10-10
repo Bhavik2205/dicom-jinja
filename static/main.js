@@ -187,14 +187,6 @@ document.addEventListener('DOMContentLoaded', function () {
         cornerstoneTools.setToolActive('CobbAngle', { mouseButtonMask: 1 })
     });
 
-    document.getElementById('activateCrosshair').addEventListener('click', function (e) {
-        console.log("Crosshair tool activated");
-        cornerstoneTools.addTool(cornerstoneTools.CrosshairsTool);
-        cornerstoneTools.setToolActive('Crosshairs', { mouseButtonMask: 1 })
-        console.log('Active Tools:', cornerstoneTools.getActiveTools);
-    });
-
-
     document.getElementById('activateErase').addEventListener('click', function (e) {
         console.log("Erase tool activated");
         cornerstoneTools.addTool(cornerstoneTools.EraserTool)
@@ -214,6 +206,10 @@ document.addEventListener('DOMContentLoaded', function () {
         viewport.invert = !viewport.invert;
         cornerstone.setViewport(selectedCanvas, viewport);
     });
+
+    document.getElementById('activateCrosshair').addEventListener('click', function (e) {
+        activateReferenceLinesAndCrosshairs();
+    })
 
     document.getElementById('resetTools').addEventListener('click', function () {
         const selectedCanvas = document.querySelector('.selected');
@@ -314,10 +310,29 @@ document.querySelectorAll('.icon-button').forEach(button => {
     });
 });
 
+
+// Function to toggle between file and folder upload
+function toggleUploadType() {
+    const fileUploadSection = document.getElementById('fileUploadSection');
+    const folderUploadSection = document.getElementById('folderUploadSection');
+
+    // Check which radio button is selected
+    const selectedUploadType = document.querySelector('input[name="uploadType"]:checked').value;
+
+    if (selectedUploadType === 'files') {
+        fileUploadSection.style.display = 'block';
+        folderUploadSection.style.display = 'none';
+    } else {
+        fileUploadSection.style.display = 'none';
+        folderUploadSection.style.display = 'block';
+    }
+}
+
 // Show the modal
 document.getElementById('addFile').addEventListener('click', function () {
     document.getElementById('uploadModal').classList.remove('hidden');
 });
+
 
 // Close the modal
 function closeModal() {
@@ -688,3 +703,107 @@ document.getElementById("openButton").addEventListener("click", function () {
         checkbox.checked = false;
     });
 });
+
+
+// function activateReferenceLinesAndCrosshairs() {
+//     const rows = 1;
+//     const cols = 2;
+//     cornerstoneTools.init();
+
+//     // Add the necessary tools to the tool manager
+//     cornerstoneTools.addTool(cornerstoneTools.CrosshairsTool);
+//     cornerstoneTools.addTool(cornerstoneTools.ReferenceLinesTool);
+
+//     // Get all canvas elements and enable cornerstone for each
+//     let canvases = [];
+//     for (let i = 0; i < rows; i++) {
+//         for (let j = 0; j < cols; j++) {
+//             const uniqueId = `canvas-${i}-${j}`;
+//             const targetCanvas = document.getElementById(uniqueId);
+//             canvases.push(targetCanvas);
+//             cornerstone.enable(targetCanvas);
+//         }
+//     }
+
+//     if (canvases.length < 2) {
+//         console.error("Expected two canvases for 1x2 layout.");
+//         return;
+//     }
+
+//     const [canvas1, canvas2] = canvases;
+
+//     // Set Crosshairs and Reference Lines active for each canvas
+//     cornerstoneTools.setToolActiveForElement(canvas1, 'Crosshairs', { mouseButtonMask: 1 });
+//     cornerstoneTools.setToolActiveForElement(canvas2, 'Crosshairs', { mouseButtonMask: 1 });
+
+//     cornerstoneTools.setToolEnabledForElement(canvas1, 'ReferenceLines', {
+//         targetElements: [canvas2]
+//     });
+//     cornerstoneTools.setToolEnabledForElement(canvas2, 'ReferenceLines', {
+//         targetElements: [canvas1]
+//     });
+
+//     // Attach crosshair synchronization logic
+//     synchronizeCrosshairs(canvas1, canvas2);
+// }
+
+// // Function to synchronize crosshairs between two canvases
+// function synchronizeCrosshairs(canvas1, canvas2) {
+//     // Define a shared crosshair synchronization function
+//     const syncCrosshair = (event) => {
+//         const element = event.detail.element;
+//         const enabledElement = cornerstone.getEnabledElement(element);
+
+//         if (!enabledElement || !enabledElement.image) return;
+
+//         // Get the current crosshair coordinates in the middle of the image
+//         const coords = {
+//             x: enabledElement.image.width / 2,
+//             y: enabledElement.image.height / 2,
+//         };
+
+//         const otherCanvas = element === canvas1 ? canvas2 : canvas1;
+
+//         // Retrieve the tool state for the crosshairs tool on the target element
+//         const toolState = cornerstoneTools.getToolState(element, 'Crosshairs');
+//         if (toolState && toolState.data) {
+//             // Update the crosshair handles on the other canvas
+//             toolState.data.forEach((toolData) => {
+//                 if (toolData.handles && toolData.handles.start && toolData.handles.end) {
+//                     toolData.handles.start.x = coords.x;
+//                     toolData.handles.start.y = coords.y;
+//                     toolData.handles.end.x = coords.x + 1; // A slight offset to show the crosshair line
+//                     toolData.handles.end.y = coords.y + 1;
+
+//                     // Trigger a redraw on the other canvas
+//                     cornerstone.updateImage(otherCanvas);
+//                 } else {
+//                     console.warn("Crosshair handles are not properly initialized.");
+//                 }
+//             });
+//         } else {
+//             console.warn("Crosshair tool state is not defined for this element.");
+//         }
+//     };
+
+//     // Attach the event listeners to synchronize crosshairs
+//     canvas1.addEventListener('cornerstoneimagerendered', syncCrosshair);
+//     canvas2.addEventListener('cornerstoneimagerendered', syncCrosshair);
+// }
+
+
+function activateCrosshairs() {
+    const rows = 1;
+    const cols = 2;
+    cornerstoneTools.init();
+
+    for(var i= 0; i < rows; i++) {
+        for(var j = 0; j < cols; j++) {
+            const uniqueId = `canvas-${i}-${j}`;
+            const targetCanvas = document.getElementById(uniqueId);
+            cornerstone.enable(targetCanvas);
+            
+            
+        }
+    }
+}

@@ -1140,3 +1140,829 @@ Button
                                                         class="material-icons">restart_alt</span><br>Reset</button>
                                 </div>
                         </div>
+
+
+
+//converter code
+
+# import pydicom
+# from pydicom.dataset import Dataset
+# from pydicom.uid import generate_uid
+# from pydicom.dataelem import DataElement
+# from PIL import Image
+# import numpy
+# import uuid
+# import datetime
+
+# # Your input file here
+# INPUT_FILE = r"C:\Users\BAPS\Downloads\onh_os_BScan_2023-11-11,18.05\sample\onh_os-001.jpg"
+
+# # Name for output DICOM
+# dicomized_filename = str(uuid.uuid4()) + '.dcm'
+
+# # Load image with Pillow
+# img = Image.open(INPUT_FILE)
+# width, height = img.size
+# print("File format is {} and size: {}, {}".format(img.format, width, height))
+
+# # Convert PNG and BMP files
+# if img.format == 'PNG' or img.format == 'BMP':
+#     img = img.convert('RGB')
+
+# # Convert image modes (types/depth of pixels)
+# # Docs: https://pillow.readthedocs.io/en/3.1.x/handbook/concepts.html
+# if img.mode == 'L':
+#     np_frame = ds.PixelData = np_frame.tobytes()
+# elif img.mode == 'RGBA' or img.mode == 'RGB':
+#     np_frame = numpy.array(img.getdata(), dtype=numpy.uint8)
+# else:
+#     print("Unknown image mode")
+#     raise ValueError(f"Unknown image mode: {img.mode}")
+
+# # Get the current datetime
+# dt = datetime.datetime.now()
+
+# # Create DICOM from scratch
+# ds = Dataset()
+# ds.file_meta = Dataset()
+# ds.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
+# ds.file_meta.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.1.1'
+# ds.file_meta.MediaStorageSOPInstanceUID = "1.2.3"
+# ds.file_meta.ImplementationClassUID = "1.2.3.4"
+
+# # Add additional patient and study information
+# ds.PatientName = "Test^Name"
+# ds.PatientID = "00-000-000"
+# ds.PatientBirthDate = "19900101"  # Format: YYYYMMDD
+# ds.StudyDate = dt.strftime('%Y%m%d')
+# ds.StudyTime = dt.strftime('%H%M%S.%f')
+# ds.PatientSex = "O"  # 'O' for Other
+# ds.Modality = "OT"  # 'OT' for Other modality
+# ds.StudyID = "1"
+# ds.SeriesNumber = 1
+
+# # Setting the StudyDescription using the correct DICOM tag
+# study_description = DataElement(0x0008103E, 'SH', "Sample study description")  # (0008, 103E)
+# ds.add(study_description)  # Add the DataElement to the dataset
+
+# ds.Rows = img.height
+# ds.Columns = img.width
+# ds.PhotometricInterpretation = "YBR_FULL_422"
+# if np_frame.shape[1] == 3:
+#     ds.SamplesPerPixel = 3
+# else:
+#     ds.SamplesPerPixel = 1
+# ds.BitsStored = 8
+# ds.BitsAllocated = 8
+# ds.HighBit = 7
+# ds.PixelRepresentation = 0
+# ds.PlanarConfiguration = 0
+# ds.NumberOfFrames = 1
+
+# ds.SOPClassUID = generate_uid()
+# ds.SOPInstanceUID = generate_uid()
+# ds.StudyInstanceUID = generate_uid()
+# ds.SeriesInstanceUID = generate_uid()
+
+# ds.PixelData = np_frame
+
+# ds.is_little_endian = True
+# ds.is_implicit_VR = False
+
+# ds.save_as(dicomized_filename, write_like_original=False)
+
+# ######## Working Sample 2 ##########
+# import pydicom
+# from pydicom.dataset import Dataset
+# from pydicom.uid import generate_uid
+# from pydicom.dataelem import DataElement
+# from PIL import Image
+# import numpy as np
+# import uuid
+# import datetime
+
+# # Your input file here
+# INPUT_FILE = r"C:\Users\BAPS\Downloads\onh_os_BScan_2023-11-11,18.05\sample\onh_os-001.jpg"  # Change this to your actual file
+
+# # Name for output DICOM
+# dicomized_filename = str(uuid.uuid4()) + '.dcm'
+
+# # Load image with Pillow
+# img = Image.open(INPUT_FILE)
+# width, height = img.size
+# print("File format is {} and size: {}, {}".format(img.format, width, height))
+
+# # Convert PNG, BMP, and JPEG files to RGB
+# if img.format in ['PNG', 'BMP', 'JPEG', 'JPG']:  # Handle JPEG formats
+#     img = img.convert('RGB')
+
+# # Convert image modes (types/depth of pixels)
+# if img.mode == 'L':  # Grayscale
+#     np_frame = np.array(img, dtype=np.uint8)  # Convert to numpy array
+# elif img.mode in ['RGBA', 'RGB']:
+#     np_frame = np.array(img, dtype=np.uint8)  # Convert to numpy array
+# else:
+#     print("Unknown image mode")
+#     raise ValueError(f"Unknown image mode: {img.mode}")
+
+# # Get the current datetime
+# dt = datetime.datetime.now()
+
+# # Create DICOM from scratch
+# ds = Dataset()
+# ds.file_meta = Dataset()
+# ds.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
+# ds.file_meta.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.1.1'
+# ds.file_meta.MediaStorageSOPInstanceUID = generate_uid()  # Use a generated UID for instance
+# ds.file_meta.ImplementationClassUID = "1.2.3.4"
+
+# # Add additional patient and study information
+# ds.PatientName = "Test^Name"
+# ds.PatientID = "00-000-000"
+# ds.PatientBirthDate = "19900101"  # Format: YYYYMMDD
+# ds.StudyDate = dt.strftime('%Y%m%d')
+# ds.StudyTime = dt.strftime('%H%M%S.%f')
+# ds.PatientSex = "O"  # 'O' for Other
+# ds.Modality = "OT"  # 'OT' for Other modality
+# ds.StudyID = "1"
+# ds.SeriesNumber = 1
+
+# # Setting the StudyDescription using the correct DICOM tag
+# study_description = DataElement(0x0008103E, 'SH', "Sample study description")  # (0008, 103E)
+# ds.add(study_description)  # Add the DataElement to the dataset
+
+# # Set image attributes
+# ds.Rows = img.height
+# ds.Columns = img.width
+# ds.PhotometricInterpretation = "YBR_FULL_422" if img.mode == 'RGB' else "MONOCHROME2"
+
+# # Determine SamplesPerPixel based on the image data
+# if img.mode == 'RGB':  # RGB
+#     ds.SamplesPerPixel = 3
+# else:
+#     ds.SamplesPerPixel = 1
+
+# ds.BitsStored = 8
+# ds.BitsAllocated = 8
+# ds.HighBit = 7
+# ds.PixelRepresentation = 0
+# ds.PlanarConfiguration = 0
+# ds.NumberOfFrames = 1
+
+# # Generate unique identifiers
+# ds.SOPClassUID = generate_uid()
+# ds.SOPInstanceUID = generate_uid()
+# ds.StudyInstanceUID = generate_uid()
+# ds.SeriesInstanceUID = generate_uid()
+
+# # Set pixel data
+# ds.PixelData = np_frame.tobytes()
+
+# # Set endianness
+# ds.is_little_endian = True
+# ds.is_implicit_VR = False
+
+# # Save the DICOM file
+# ds.save_as(dicomized_filename, write_like_original=False)
+# print(f"Saved DICOM file as: {dicomized_filename}")
+
+
+
+import pydicom
+from pydicom.dataset import Dataset, DataElement
+from pydicom.uid import generate_uid
+from PIL import Image
+import numpy as np
+import uuid
+import datetime
+import os
+
+# Your input directory here
+INPUT_DIR = r"C:\Users\BAPS\Downloads\onh_os_BScan_2023-11-11,18.05\sample"
+
+# Name for output DICOM
+dicomized_filename = str(uuid.uuid4()) + '.dcm'
+
+# Get the current datetime
+dt = datetime.datetime.now()
+
+# Create DICOM from scratch
+ds = Dataset()
+ds.file_meta = Dataset()
+ds.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
+ds.file_meta.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.1.1'  # Multi-frame image storage
+ds.file_meta.MediaStorageSOPInstanceUID = generate_uid()  # Unique SOP Instance UID
+ds.file_meta.ImplementationClassUID = "1.2.3.4"
+
+# Add additional patient and study information
+ds.PatientName = "Test^Name"
+ds.PatientID = "00-000-000"
+ds.PatientBirthDate = "19900101"  # Format: YYYYMMDD
+ds.StudyDate = dt.strftime('%Y%m%d')
+ds.StudyTime = dt.strftime('%H%M%S.%f')
+ds.PatientSex = "O"  # 'O' for Other
+ds.Modality = "OT"  # 'OT' for Other modality
+ds.StudyID = "1"
+ds.SeriesNumber = 1
+
+# Set the study description (must be <= 16 characters for VR SH)
+study_description = DataElement(0x0008103E, 'SH', "Sample study")  # Short description
+ds.add(study_description)  # Add the DataElement to the dataset
+
+# List to hold the pixel data for all frames
+pixel_data_frames = []
+
+# Iterate through images in the input directory
+for image_file in os.listdir(INPUT_DIR):
+    if image_file.lower().endswith(('.png', '.jpg', '.jpeg')):
+        image_path = os.path.join(INPUT_DIR, image_file)
+        img = Image.open(image_path)
+
+        print("Processing file: {} | Format: {} | Size: {}".format(image_file, img.format, img.size))
+
+        # Convert image modes
+        if img.format in ['PNG', 'BMP', 'JPEG', 'JPG']:
+            img = img.convert('RGB')
+        
+        # Handle grayscale images
+        if img.mode == 'L':
+            img = img.convert('RGB')  # Convert grayscale to RGB
+
+        # Convert image to numpy array
+        np_frame = np.array(img)
+
+        if np_frame.ndim == 3:
+            pixel_data_frames.append(np_frame)
+        else:
+            print(f"Unsupported image mode for {image_file}: {img.mode}")
+
+# Check if there are frames to process
+if not pixel_data_frames:
+    raise ValueError("No valid frames found to create DICOM file.")
+
+# Get dimensions from the first frame
+first_frame_shape = pixel_data_frames[0].shape
+ds.Rows, ds.Columns = first_frame_shape[:2]
+ds.NumberOfFrames = len(pixel_data_frames)
+
+# Determine SamplesPerPixel
+if first_frame_shape[2] == 3:
+    ds.PhotometricInterpretation = "RGB"
+    ds.SamplesPerPixel = 3
+else:
+    ds.PhotometricInterpretation = "MONOCHROME2"
+    ds.SamplesPerPixel = 1
+
+# Set common DICOM pixel attributes
+ds.BitsStored = 8
+ds.BitsAllocated = 8
+ds.HighBit = 7
+ds.PixelRepresentation = 0
+ds.PlanarConfiguration = 0
+
+# Combine all frames into a single pixel array for multi-frame DICOM
+multi_frame_pixel_data = b''.join(frame.tobytes() for frame in pixel_data_frames)
+ds.PixelData = multi_frame_pixel_data
+
+# Set remaining attributes for the multi-frame DICOM
+ds.SOPClassUID = '1.2.840.10008.5.1.4.1.1.14.1'  # Multi-frame True Color Image Storage UID
+ds.SOPInstanceUID = generate_uid()
+ds.StudyInstanceUID = generate_uid()
+ds.SeriesInstanceUID = generate_uid()
+
+ds.is_little_endian = True
+ds.is_implicit_VR = False
+
+# Save the multi-frame DICOM file
+ds.save_as(dicomized_filename, write_like_original=False)
+print(f"Multi-frame DICOM saved successfully at: {dicomized_filename}")
+
+
+
+
+
+
+
+
+
+
+
+
+@app.route('/upload', methods=['POST'])
+def upload_file():
+     if 'file' not in request.files:
+        return redirect(request.url)
+    
+     files = request.files.getlist('file')  # Get a list of all uploaded files
+    
+     if not files or len(files) == 0:
+        return redirect(request.url)
+    
+     # Check if the user selected to convert to DCM
+     convert_option = request.form.get('convertOption', 'no')
+     
+     # List to store images if converting to DCM
+     images_to_convert = []
+
+     # Default value for upload_date in case no files are saved normally
+     upload_date = None
+
+     # Process each file in the list
+     for file in files:
+        if file and allowed_file(file.filename):
+            if convert_option == 'yes':
+                 # Read the file stream and convert it into a NumPy array that cv2 can understand
+                file_bytes = np.frombuffer(file.read(), np.uint8)  # Read the file contents as bytes
+                image = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)  # Decode the bytes into an image array
+
+                if image is not None:
+                        print(f"Image read successfully: {file.filename} (shape: {image.shape})")
+                        images_to_convert.append(image)
+                else:
+                    print(f"Error reading image from file: {file.filename}")
+            else:
+                # Save the original file normally
+                upload_date, filename = save_file(file)
+
+   # Convert to DICOM only if there are images to convert
+     if convert_option == 'yes' and images_to_convert:
+        if upload_date is None:
+            upload_date = datetime.now().strftime('%Y-%m-%d')  # Fallback if not set
+        dcm_filename = convert_to_dcm(images_to_convert, upload_date)
+        print(f"DICOM File Saved: {dcm_filename}")
+
+    
+     return redirect(url_for('index'))
+
+def convert_to_dcm(images, upload_date):
+    # This function will contain the logic for converting images to DICOM
+    # It should encapsulate the code you've provided for creating the DICOM file
+    dicomized_filename = str(uuid.uuid4()) + '.dcm'
+
+    # Create a new DICOM dataset
+    ds = Dataset()
+    ds.file_meta = Dataset()
+    ds.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
+    ds.file_meta.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.14.1'  # Multi-frame True Color Image Storage
+    ds.file_meta.MediaStorageSOPInstanceUID = generate_uid()
+    ds.file_meta.ImplementationClassUID = "1.2.3.4"
+
+    # Add patient and study information
+    ds.PatientName = "Test^Name"
+    ds.PatientID = "00-000-000"
+    ds.PatientBirthDate = "19900101"  # Format: YYYYMMDD
+    ds.StudyDate = upload_date
+    ds.StudyTime = datetime.now().strftime('%H%M%S.%f')
+    ds.PatientSex = "O"  # 'O' for Other
+    ds.Modality = "OT"  # 'OT' for Other modality
+    ds.StudyID = "1"
+    ds.SeriesNumber = 1
+
+    # Set study description (shorter than 16 characters)
+    study_description = DataElement(0x0008103E, 'SH', "Sample study")
+    ds.add(study_description)
+
+    # List to hold pixel data for all frames
+    pixel_data_frames = []
+
+    # Process each image in the input
+    for img in images:
+        # Convert image to PIL format
+        pil_image = Image.fromarray(img)
+
+        # Convert to RGB if needed
+        if pil_image.mode in ['L', 'RGBA']:
+            pil_image = pil_image.convert('RGB')
+
+        # Convert image to numpy array
+        np_frame = np.array(pil_image)
+
+        if np_frame.ndim == 3:
+            pixel_data_frames.append(np_frame)
+        else:
+            print(f"Unsupported image mode: {pil_image.mode}")
+
+    # Check if there are frames to process
+    if not pixel_data_frames:
+        raise ValueError("No valid frames found to create DICOM file.")
+
+    # Set dimensions and other attributes for the DICOM file
+    first_frame_shape = pixel_data_frames[0].shape
+    ds.Rows, ds.Columns = first_frame_shape[:2]
+    ds.NumberOfFrames = len(pixel_data_frames)
+
+    if first_frame_shape[2] == 3:
+        ds.PhotometricInterpretation = "RGB"
+        ds.SamplesPerPixel = 3
+    else:
+        ds.PhotometricInterpretation = "MONOCHROME2"
+        ds.SamplesPerPixel = 1
+
+    # Set common DICOM pixel attributes
+    ds.BitsStored = 8
+    ds.BitsAllocated = 8
+    ds.HighBit = 7
+    ds.PixelRepresentation = 0
+    ds.PlanarConfiguration = 0
+
+    # Combine frames into a single pixel array for multi-frame DICOM
+    multi_frame_pixel_data = b''.join(frame.tobytes() for frame in pixel_data_frames)
+    ds.PixelData = multi_frame_pixel_data
+
+    # Set remaining attributes
+    ds.SOPClassUID = '1.2.840.10008.5.1.4.1.1.14.1'
+    ds.SOPInstanceUID = generate_uid()
+    ds.StudyInstanceUID = generate_uid()
+    ds.SeriesInstanceUID = generate_uid()
+
+    ds.is_little_endian = True
+    ds.is_implicit_VR = False
+
+    # Save the multi-frame DICOM file
+    ds.save_as(dicomized_filename, write_like_original=False)
+    return dicomized_filename
+
+
+
+
+# def convert_to_dcm(images, upload_date, target_size=(512, 512)):
+#     # This function will contain the logic for converting images to DICOM
+#     dicomized_filename = os.path.join('uploads', str(uuid.uuid4()) + '.dcm')
+
+#     # Create a new DICOM dataset
+#     ds = Dataset()
+#     ds.file_meta = Dataset()
+#     ds.file_meta.TransferSyntaxUID = pydicom.uid.ExplicitVRLittleEndian
+#     ds.file_meta.MediaStorageSOPClassUID = '1.2.840.10008.5.1.4.1.1.14.1'  # Multi-frame True Color Image Storage
+#     ds.file_meta.MediaStorageSOPInstanceUID = generate_uid()
+#     ds.file_meta.ImplementationClassUID = "1.2.3.4"
+
+#     # Add patient and study information
+#     ds.PatientName = "Test^Name"
+#     ds.PatientID = "00-000-000"
+#     ds.PatientBirthDate = "19900101"  # Format: YYYYMMDD
+#     ds.StudyDate = upload_date
+#     ds.StudyTime = datetime.now().strftime('%H%M%S.%f')
+#     ds.PatientSex = "O"  # 'O' for Other
+#     ds.Modality = "OT"  # 'OT' for Other modality
+#     ds.StudyID = "1"
+#     ds.SeriesNumber = 1
+
+#     # Set study description (shorter than 16 characters)
+#     study_description = pydicom.dataelem.DataElement(0x0008103E, 'SH', "Sample study")
+#     ds.add(study_description)
+
+#     # List to hold pixel data for all frames
+#     pixel_data_frames = []
+
+#     # Process each image in the input
+#     for img in images:
+#         # Convert image to PIL format
+#         pil_image = Image.fromarray(img)
+
+#         # Convert to RGB if needed
+#         if pil_image.mode in ['L', 'RGBA']:
+#             pil_image = pil_image.convert('RGB')
+
+#         # Resize image while maintaining aspect ratio and padding with black
+#         pil_image.thumbnail(target_size, Image.ANTIALIAS)
+#         new_image = Image.new("RGB", target_size, (0, 0, 0))  # Create a black background
+#         new_image.paste(pil_image, ((target_size[0] - pil_image.width) // 2, 
+#                                       (target_size[1] - pil_image.height) // 2))
+
+#         # Convert image to numpy array
+#         np_frame = np.array(new_image)
+
+#         if np_frame.ndim == 3:
+#             pixel_data_frames.append(np_frame)
+#         else:
+#             print(f"Unsupported image mode: {pil_image.mode}")
+
+#     # Check if there are frames to process
+#     if not pixel_data_frames:
+#         raise ValueError("No valid frames found to create DICOM file.")
+
+#     # Set dimensions and other attributes for the DICOM file
+#     first_frame_shape = pixel_data_frames[0].shape
+#     ds.Rows, ds.Columns = first_frame_shape[:2]
+#     ds.NumberOfFrames = len(pixel_data_frames)
+
+#     if first_frame_shape[2] == 3:
+#         ds.PhotometricInterpretation = "RGB"
+#         ds.SamplesPerPixel = 3
+#     else:
+#         ds.PhotometricInterpretation = "MONOCHROME2"
+#         ds.SamplesPerPixel = 1
+
+#     # Set common DICOM pixel attributes
+#     ds.BitsStored = 8
+#     ds.BitsAllocated = 8
+#     ds.HighBit = 7
+#     ds.PixelRepresentation = 0
+#     ds.PlanarConfiguration = 0
+
+#     # Combine frames into a single pixel array for multi-frame DICOM
+#     multi_frame_pixel_data = b''.join(frame.tobytes() for frame in pixel_data_frames)
+#     ds.PixelData = multi_frame_pixel_data
+
+#     # Set remaining attributes
+#     ds.SOPClassUID = '1.2.840.10008.5.1.4.1.1.14.1'
+#     ds.SOPInstanceUID = generate_uid()
+#     ds.StudyInstanceUID = generate_uid()
+#     ds.SeriesInstanceUID = generate_uid()
+
+#     ds.is_little_endian = True
+#     ds.is_implicit_VR = False
+
+#     # Save the multi-frame DICOM file
+#     ds.save_as(dicomized_filename, write_like_original=False)
+#     return dicomized_filename
+
+
+
+ <button id="activateEnface" class="icon-button" onclick="selectFolder()"><img
+                                                src="{{ url_for('static', filename='icons/ai.png') }}" alt="Enface"
+                                                class="icon-img"><br>Enface</button>
+                                <!-- <button id="activateEnface" class="icon-button" onclick="selectFolder()"><span
+                                                class="material-icons">image</span><br>Enface</button> -->
+                                <input type="file" id="folderInput" webkitdirectory directory style="display:none;"
+                                        onchange="processFolder()" />
+
+
+# # Modified route to process uploaded images in-memory
+# @app.route('/process_enface', methods=['POST'])
+# def process_enface():
+#     try:
+#         # Create a list to store images
+#         images = []
+
+#         # Read each uploaded file directly into OpenCV
+#         for i in range(512):
+#             # Read file as bytes and convert to a NumPy array
+#             file = request.files[f'file{i}'].read()
+#             np_img = np.frombuffer(file, np.uint8)
+            
+#             # Decode the image using OpenCV
+#             img = cv2.imdecode(np_img, cv2.IMREAD_COLOR)
+#             if img is None:
+#                 return jsonify({'error': f"Image at index {i} could not be read."}), 400
+#             images.append(img)
+
+#         # Call enface processing module using in-memory images
+#         enface_image, contrast_image = perform_enface_processing(images)
+
+#          # Create a folder for the current date
+#         upload_date = datetime.now().strftime('%Y-%m-%d')
+       
+#         # Save processed images to disk using the save_image function
+#         enface_filename, enface_filepath = save_image(enface_image, upload_date, 'enface')
+#         contrast_filename, contrast_filepath = save_image(contrast_image, upload_date, 'contrast')
+
+#         # Return the paths of the saved images in JSON response
+#         return jsonify({
+#             'enface_image_path': enface_filepath,
+#             'contrast_image_path': contrast_filepath
+#         }), 200
+
+#     except Exception as e:
+#         return jsonify({'error': str(e)}), 500
+
+
+
+# Utility function to save a NumPy image to disk
+def save_image(image, upload_date, prefix):
+    # Generate a unique filename using UUID
+    unique_id = str(uuid.uuid4())
+    filename = f"{prefix}_{unique_id}.png"  # Save as PNG format
+    date_folder = os.path.join(app.config['UPLOAD_FOLDER'], upload_date)
+    
+    # Create the folder if it doesn't exist
+    os.makedirs(date_folder, exist_ok=True)
+    
+    # Save the image file
+    filepath = os.path.join(date_folder, filename)
+    cv2.imwrite(filepath, image)
+    
+    return filename, filepath
+
+def resize_image(image, target_shape):
+    """
+    Resize the given image to match the target shape.
+    Args:
+        image (np.array): The image to resize.
+        target_shape (tuple): The target shape (height, width).
+    Returns:
+        np.array: The resized image.
+    """
+    return cv2.resize(image, (target_shape[1], target_shape[0]))  # Resize to (width, height)
+
+@app.route('/process_enface', methods=['POST'])
+def process_enface():
+    try:
+        # Create a list to store images
+        images = []
+        target_shape = None  # Track the target shape to enforce uniform dimensions
+        file_paths = request.json.get('file_paths', [])  # Assuming file paths are sent in the request body as JSON
+
+        for file_path in file_paths:
+            # Check if the file exists
+            if not os.path.isfile(file_path):
+                return jsonify({'error': f"File path '{file_path}' does not exist."}), 400
+
+            # Check if the file is a DICOM file
+            if file_path.lower().endswith('.dcm'):
+                try:
+                    # Read the DICOM file directly from the file system
+                    dicom_file = pydicom.dcmread(file_path)
+                    
+                    # Extract frames (assuming frames are stored in the pixel array)
+                    pixel_array = dicom_file.pixel_array
+                    num_frames = pixel_array.shape[0]
+                    
+                    for i in range(num_frames):
+                        # Convert each frame to a NumPy image
+                        img = pixel_array[i, :, :].astype(np.uint8)  # Convert to uint8 if necessary
+
+                        # Set target shape if it's not defined yet
+                        if target_shape is None:
+                            target_shape = img.shape  # Set the first image's shape as the target shape
+                        else:
+                            # If the current image shape does not match the target, resize it
+                            if img.shape != target_shape:
+                                img = resize_image(img, target_shape)
+
+                        images.append(img)
+                except Exception as dicom_error:
+                    return jsonify({'error': f"Failed to read DICOM file at '{file_path}': {str(dicom_error)}"}), 400
+            else:
+                # For non-DICOM files, assume standard image formats (e.g., .png, .jpg)
+                img = cv2.imread(file_path, cv2.IMREAD_COLOR)
+                if img is None:
+                    return jsonify({'error': f"Image at '{file_path}' could not be read."}), 400
+
+                # Set target shape if it's not defined yet
+                if target_shape is None:
+                    target_shape = img.shape  # Set the first image's shape as the target shape
+                else:
+                    # If the current image shape does not match the target, resize it
+                    if img.shape != target_shape:
+                        img = resize_image(img, target_shape)
+
+                images.append(img)
+
+        # Call enface processing module using in-memory images
+        enface_image, contrast_image = perform_enface_processing(images)
+
+        # Create a folder for the current date
+        upload_date = datetime.now().strftime('%Y-%m-%d')
+       
+        # Save processed images to disk using the save_image function
+        enface_filename, enface_filepath = save_image(enface_image, upload_date, 'enface')
+        contrast_filename, contrast_filepath = save_image(contrast_image, upload_date, 'contrast')
+
+        # Return the paths of the saved images in JSON response
+        return jsonify({
+            'enface_image_path': enface_filepath,
+            'contrast_image_path': contrast_filepath
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Enface processing function that accepts in-memory images
+def perform_enface_processing(images):
+    height = width = 512
+    enface_image = np.zeros((height, width, 3), float)
+    
+    # Compute enface image as before
+    for i in range(len(images)):
+        if images[i] is not None:
+            enface_image[i, 0:512] = np.sum(images[i], axis=0) / 512
+
+    # Normalize and increase contrast
+    enface_image = cv2.normalize(enface_image, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+    enface_img_contrast = increase_brightness(enface_image)
+
+    return enface_image, enface_img_contrast
+
+def increase_brightness(img, value=40):
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv)
+    lim = 255 - value
+    v[v > lim] = 255
+    v[v <= lim] += value
+    final_hsv = cv2.merge((h, s, v))
+    img = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
+    return img
+
+
+
+//working enface module
+# Modified route to process uploaded DICOM file
+@app.route('/process_enface', methods=['POST'])
+def process_enface():
+    try:
+        # Get the file paths from the request
+        file_paths = request.json.get('file_paths', [])
+        if not file_paths:
+            return jsonify({'error': "File paths are required."}), 400
+
+      
+        # Construct the absolute file path
+        relative_file_path = file_paths[0]
+        absolute_file_path = os.path.join(app.config['UPLOAD_FOLDER'], relative_file_path.lstrip('/uploads'))
+
+
+        if not os.path.isfile(absolute_file_path):
+            return jsonify({'error': f"File path '{absolute_file_path}' does not exist."}), 400
+
+        # Read the DICOM file
+        dicom_data = pydicom.dcmread(absolute_file_path)
+        pixel_data = dicom_data.pixel_array
+
+        # Ensure the DICOM file contains exactly 512 frames
+        if pixel_data.shape[0] != 512:
+            return jsonify({'error': "DICOM file must contain exactly 512 frames."}), 400
+
+        # Extract and resize frames from the pixel data
+        images = []
+        for i in range(512):
+            image = pixel_data[i]
+            resized_image = cv2.resize(image, (512, 512))
+            images.append(resized_image)
+
+        # Call enface processing module using in-memory images
+        enface_image, contrast_image = perform_enface_processing(images)
+
+        # Create a folder for the current date
+        upload_date = datetime.now().strftime('%Y-%m-%d')
+
+        # Save processed images to disk using the save_image function
+        enface_filename, enface_filepath = save_image(enface_image, upload_date, 'enface')
+        contrast_filename, contrast_filepath = save_image(contrast_image, upload_date, 'contrast')
+
+        # Return the paths of the saved images in JSON response
+        return jsonify({
+            'enface_image_path': enface_filepath,
+            'contrast_image_path': contrast_filepath
+        }), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+# Enface processing function that accepts in-memory images
+def perform_enface_processing(images):
+    height = width = 512
+    enface_image = np.zeros((height, width, 3), float)
+
+    # Compute enface image as before
+    for i in range(len(images)):
+        if images[i] is not None:
+            enface_image[i, :] = np.sum(images[i], axis=0) / 512
+
+    # Normalize and increase contrast
+    enface_image = cv2.normalize(enface_image, None, 0, 255, cv2.NORM_MINMAX, cv2.CV_8U)
+    enface_img_contrast = increase_brightness(enface_image)
+
+    return enface_image, enface_img_contrast
+
+def increase_brightness(img, value=40):
+    hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv)
+    lim = 255 - value
+    v[v > lim] = 255
+    v[v <= lim] += value
+    final_hsv = cv2.merge((h, s, v))
+    img = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2BGR)
+    return img
+
+
+
+
+
+from pydicom.dataset import FileDataset
+import numpy as np
+
+# Assuming `pixel_array` is the 512 frames data
+ds = FileDataset("output.dcm", {}, file_meta=meta, preamble=b"\0" * 128)
+
+# Convert your pixel array to the required format
+ds.PixelData = pixel_array.tobytes()
+
+# Specify JPEG compression (use other compression options if needed)
+ds.compress('JPEG')  # This applies JPEG compression
+
+# Save the file
+ds.save_as("compressed_output.dcm")
+Udaya Bhaskar
+9:29 PM
+ds = FileDataset("output.dcm", {}, file_meta=meta, preamble=b"\0" * 128)
+
+# Assuming `frames` is a list or 3D array of 512x512 frames
+ds.NumberOfFrames = len(frames)
+ds.PixelData = np.stack(frames).tobytes()  # Convert to bytes for DICOM
+
+ds.save_as("output.dcm")
+
+
+recomended size=60-70mb

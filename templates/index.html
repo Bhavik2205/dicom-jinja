@@ -36,14 +36,9 @@
                 <img src="{{ url_for('static', filename='logoFull.png') }}" alt="Company Logo" class="logo">
                 <div class="button-container-wrapper">
                         <div class="button-container">
-                                <!-- <button id="activateWwwc">Window / Level</button> -->
-                                <button id="activateEnface" class="icon-button" onclick="selectFolder()"><img
-                                                src="{{ url_for('static', filename='icons/ai.png') }}" alt="Enface"
-                                                class="icon-img"><br>Enface</button>
-                                <!-- <button id="activateEnface" class="icon-button" onclick="selectFolder()"><span
-                                                class="material-icons">image</span><br>Enface</button> -->
-                                <input type="file" id="folderInput" webkitdirectory directory style="display:none;"
-                                        onchange="processFolder()" />
+                                <button id="activateEnface" class="icon-button" onclick="selectFolder()">
+                                        <img src="{{ url_for('static', filename='icons/ai.png') }}" alt="Enface" class="icon-img"><br>Enface
+                                    </button>
                                 <button id="activateWwwc" class="icon-button"><span
                                                 class="material-icons">contrast</span><br>Window / Level</button>
                                 <button id="layout" onclick="toggleLayoutButton()" class="icon-button"><span
@@ -174,8 +169,40 @@
                         <span class="close" onclick="closeModal()">&times;</span>
                         <h2>Add File</h2>
                         <form action="/upload" method="POST" enctype="multipart/form-data">
-                                <input type="file" id="file" name="file"
-                                        accept=".dcm, .jpg, .png, .jpeg, .tiff, .tif, .pdf">
+                                <!-- <input type="file" id="file" name="file"
+                                        accept=".dcm, .jpg, .png, .jpeg, .tiff, .tif, .pdf" multiple> -->
+
+                                <!-- Option to Upload Multiple Files or a Folder -->
+                                <label>
+                                        <input type="radio" name="uploadType" value="files" checked
+                                                onclick="toggleUploadType()"> Upload Files
+                                </label>
+                                <label>
+                                        <input type="radio" name="uploadType" value="folder"
+                                                onclick="toggleUploadType()"> Upload Folder
+                                </label>
+                                <br><br>
+
+                                <!-- File Input (Multiple Files Allowed) -->
+                                <div id="fileUploadSection">
+                                        <label for="file">Select Files:</label>
+                                        <input type="file" id="file" name="file"
+                                                accept=".dcm, .jpg, .png, .jpeg" multiple><br><br>
+                                </div>
+
+                                <!-- Folder Input (Initially Hidden) -->
+                                <div id="folderUploadSection" style="display: none;">
+                                        <label for="folderInput">Select Folder:</label>
+                                        <input type="file" id="folderInput" name="folderInput" webkitdirectory
+                                                directory><br><br>
+                                </div>
+
+                                <!-- Convert to DCM Option -->
+                                <label for="convertOption">Convert to DCM:</label>
+                                <select id="convertOption" name="convertOption">
+                                        <option value="no">No</option>
+                                        <option value="yes">Yes</option>
+                                </select><br><br>
                                 <input type="submit" value="Add File">
                         </form>
                 </div>
@@ -205,6 +232,7 @@
                         -webkit-backdrop-filter: blur(10px);
                 }
         </style>
+        <!-- <script src="{{ url_for('static', filename='main.js') }}"></script> -->
         <script src="{{ url_for('static', filename='main.js') }}"></script>
         <script src="{{ url_for('static', filename='phase2.js') }}"></script>
 </body>
